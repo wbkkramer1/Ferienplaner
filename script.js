@@ -76,8 +76,10 @@ function formatiereSpanne(datum) {
     return `${t}.${m}.`;
 }
 
-// Lädt die Daten über den AllOrigins-Bypass im Hintergrund
+// Nutzt AllOrigins, extrahiert die Daten aber ohne blockierende Custom-Header
 async function ladeLiveCrowdDaten() {
+    // Da wir keine Header mitschicken können, rufen wir den nackten Endpunkt ab,
+    // den AllOrigins ohne Preflight-Blockade parsen kann.
     const targetUrl = 'https://api.wartezeiten.app/v1/parks';
     
     setTimeout(() => {
@@ -88,31 +90,46 @@ async function ladeLiveCrowdDaten() {
     }, 4000);
 
     try {
+        // Reine GET-Anfrage ohne Headers-Objekt umgeht die Preflight-Sperre im Browser!
         const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
         if (response.ok) {
             const dataWrapper = await response.json();
             if (dataWrapper.contents) {
-                apiLiveDaten = JSON.parse(dataWrapper.contents);
-                apiGeladen = true;
-                console.log("Live-Daten erfolgreich geladen!", apiLiveDaten);
+                const parsedData = JSON.parse(dataWrapper.contents);
+                
+                // Falls die API wegen fehlender Header meckert oder ein Error-Objekt wirft,
+                // fangen wir das ab, damit das Dashboard nicht weiß bleibt
+                if (parsedData && !parsedData.error && Array.isArray(parsedData)) {
+                    apiLiveDaten = parsedData;
+                    apiGeladen = true;
+                    console.log("Live-Daten erfolgreich geladen und verarbeitet!", apiLiveDaten);
+                } else {
+                    console.log("API lieferte Fehlermeldung statt Array. Nutze Prognose-Modus.");
+                }
                 updateDashboard();
                 return;
             }
         }
     } catch (fehler) {
-        console.error("CORS-Bypass fehlgeschlagen. Nutze Prognose-Modus.", fehler);
+        console.error("Sämtliche Proxys blockiert. Nutze lokalen Prognose-Modus.", fehler);
+        updateDashboard();
     }
 }
 
-// Extrahiert den gerundeten Wert aus dem Feld 'crowd_level'
+// Holt den Prozentwert tagesgenau aus der Schnittstelle
 function holeLiveProzentwert(parkApiId) {
     if (!apiLiveDaten || !parkApiId || !Array.isArray(apiLiveDaten)) return null;
     
     if (aktuellesDatum.getDate() === 27 && aktuellesDatum.getMonth() === 4) {
+        // Durchsucht das Array nach der ID
         const livePark = apiLiveDaten.find(p => p && p.id === parkApiId);
         
-        if (livePark && livePark.crowd_level !== undefined && livePark.crowd_level !== null) {
-            return Math.round(parseFloat(livePark.crowd_level));
+        // Da wir keine Sprache mitgeben konnten, prüfen wir flexibel auf crowd_level oder crowdlevel
+        if (livePark) {
+            const level = livePark.crowd_level !== undefined ? livePark.crowd_level : livePark.crowdlevel;
+            if (level !== undefined && level !== null) {
+                return Math.round(parseFloat(level));
+            }
         }
     }
     return null;
