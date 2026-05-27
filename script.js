@@ -1,8 +1,7 @@
 // Globale Zustände
-let aktuellesDatum = new Date(2026, 4, 27); // Heute ist der 27. Mai 2026
+let aktuellesDatum = new Date(2026, 4, 27); // Fixiert auf den 27. Mai 2026
 let ausgewaehltesBundesland = "Mecklenburg-Vorpommern";
 let ganzeWochePruefen = false;
-let apiLiveDaten = null; 
 
 const MONATS_NAMEN = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 const WOCHEN_TAGE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
@@ -75,47 +74,8 @@ function formatiereSpanne(datum) {
     return `${t}.${m}.`;
 }
 
-// FIX: Holt die Live-Daten über einen verlässlichen JSON-Bypass, damit GitHub Pages sie verarbeiten darf
-async function ladeLiveCrowdDaten() {
-    try {
-        // Wir nutzen den stabilen, unverschlüsselten allorigins-Dienst als HTTPS-Tunnel
-        const response = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://api.wartezeiten.app/v1/crowdlevel'));
-        if (response.ok) {
-            const dataWrapper = await response.json();
-            if (dataWrapper.contents) {
-                apiLiveDaten = JSON.parse(dataWrapper.contents);
-                console.log("Live-Daten via GitHub-Bypass geladen:", apiLiveDaten);
-                updateDashboard(); // Sofortiger Refresh der Badges
-            }
-        }
-    } catch (fehler) {
-        console.error("API-Abruf im Hintergrund fehlgeschlagen. Prognose bleibt aktiv.", fehler);
-    }
-}
-
-function holeLiveProzentwert(parkApiId) {
-    if (!apiLiveDaten || !parkApiId) return null;
-    
-    const heuteSicherStr = zuLokalemIsoString(new Date(2026, 4, 27)); 
-    const zielSicherStr = zuLokalemIsoString(aktuellesDatum);
-    
-    if (heuteSicherStr === zielSicherStr) {
-        const livePark = apiLiveDaten.find(p => p.id === parkApiId);
-        if (livePark && livePark.crowdlevel !== undefined && livePark.crowdlevel !== null) {
-            return livePark.crowdlevel;
-        }
-    }
-    return null;
-}
-
+// Kalenderbasierte, ausfallsichere Auslastungsberechnung
 function berechneParkAuslastung(park, testTage) {
-    const prozent = holeLiveProzentwert(park.apiId);
-    if (prozent !== null) {
-        if (prozent >= 65) return "voll";
-        if (prozent >= 35) return "maessig";
-        return "leer";
-    }
-
     const hatFeiertag = testTage.some(tt => holeFeiertagsNameFuerLand(tt, park.bundesland) !== null);
     if (hatFeiertag) return "voll";
 
@@ -139,9 +99,7 @@ window.addEventListener('DOMContentLoaded', () => {
     initDropdown();
     baueKalender();
     initMapHover(); 
-    
     updateDashboard();
-    ladeLiveCrowdDaten(); // Lädt die Daten asynchron nach
 
     document.getElementById('state-select').addEventListener('change', (e) => {
         ausgewaehltesBundesland = e.target.value;
@@ -247,21 +205,16 @@ function initMapHover() {
             const parkGefunden = TOP_PARKS.find(p => p.name === parkName);
             if (parkGefunden) {
                 const status = berechneParkAuslastung(parkGefunden, [aktuellesDatum]);
-                const liveProzent = holeLiveProzentwert(parkGefunden.apiId);
                 let statusText = "";
                 
-                if (liveProzent !== null) {
-                    statusText = `LIVE: ${liveProzent}% Auslastung`;
-                } else {
-                    if (status === "voll") {
-                        const feiertagName = holeFeiertagsNameFuerLand(aktuellesDatum, parkGefunden.bundesland);
-                        statusText = feiertagName ? `Voll (Feiertag: ${feiertagName})` : `Voll (Ferien in ${parkGefunden.bundesland})`;
-                    }
-                    if (status === "maessig") {
-                        statusText = (aktuellesDatum.getDay() === 0 || aktuellesDatum.getDay() === 6) ? `Mäßig (Wochenend-Andrang)` : `Mäßig (Nachbarferien)`;
-                    }
-                    if (status === "leer") statusText = `Leer (Freie Fahrt!)`;
+                if (status === "voll") {
+                    const feiertagName = holeFeiertagsNameFuerLand(aktuellesDatum, parkGefunden.bundesland);
+                    statusText = feiertagName ? `Voll (Feiertag: ${feiertagName})` : `Voll (Ferien in ${parkGefunden.bundesland})`;
                 }
+                if (status === "maessig") {
+                    statusText = (aktuellesDatum.getDay() === 0 || aktuellesDatum.getDay() === 6) ? `Mäßig (Wochenend-Andrang)` : `Mäßig (Nachbarferien)`;
+                }
+                if (status === "leer") statusText = `Leer (Freie Fahrt!)`;
                 
                 document.getElementById('info-box').textContent = `${parkGefunden.name} (${parkGefunden.ort}) • ${statusText} • [Klicken für Website]`;
             }
@@ -289,17 +242,6 @@ function pruefeInfoboxText() {
             d.setDate(d.getDate() + i);
             testTage.push(d);
         }
-    }
-    
-    const heuteStrIso = zuLokalemIsoString(new Date(2026, 4, 27));
-    const zielStrIso = zuLokalemIsoString(aktuellesDatum);
-    if (heuteStrIso === zielStrIso) {
-        if (apiLiveDaten) {
-            document.getElementById('info-box').textContent = `⚡ Live-Modus aktiv: Unterstützte Parks zeigen die prozentuale Echtzeit-Auslastung der API.`;
-        } else {
-            document.getElementById('info-box').textContent = `🔮 Prognose-Modus: Verbinde über GitHub-Bypass mit Wartezeiten-Server...`;
-        }
-        return;
     }
 
     const feiertagName = holeFeiertagsNameFuerLand(aktuellesDatum, ausgewaehltesBundesland);
@@ -392,7 +334,6 @@ function updateDashboard() {
 
     TOP_PARKS.forEach(park => {
         const auslastung = berechneParkAuslastung(park, testTage);
-        const liveProzent = holeLiveProzentwert(park.apiId);
         
         const parkItem = document.createElement('div');
         parkItem.className = `park-item ${auslastung === 'voll' ? 'ferien' : (auslastung === 'maessig' ? 'maessig' : '')}`;
@@ -400,15 +341,10 @@ function updateDashboard() {
         let badgeText = "Leer";
         if (auslastung === "voll") badgeText = "Voll";
         if (auslastung === "maessig") badgeText = "Mäßig";
-        if (liveProzent !== null) badgeText = `${liveProzent}%`;
-
-        const heuteStrIso = zuLokalemIsoString(new Date(2026, 4, 27));
-        const zielStrIso = zuLokalemIsoString(aktuellesDatum);
-        const istLive = (heuteStrIso === zielStrIso && apiLiveDaten && park.apiId);
 
         parkItem.innerHTML = `
             <div class="park-info">
-                <span class="park-name">${park.name}${istLive ? ' ⚡' : ''}</span>
+                <span class="park-name">${park.name}</span>
                 <span class="park-ort">${park.ort} (${park.bundesland})</span>
             </div>
             <span class="park-status-badge state-${auslastung}">${badgeText}</span>
