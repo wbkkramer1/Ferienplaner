@@ -104,14 +104,19 @@ async function ladeLiveCrowdDaten() {
     }
 }
 
-// Holt den Prozentwert aus dem AllOrigins-Datenpaket
+// FIX: Zieht jetzt 'crowd_level' mit Unterstrich aus der Schnittstelle
 function holeLiveProzentwert(parkApiId) {
     if (!apiLiveDaten || !parkApiId) return null;
     
     // Prüft tagesgenau auf den 27. Mai
     if (aktuellesDatum.getDate() === 27 && aktuellesDatum.getMonth() === 4) {
         const livePark = apiLiveDaten.find(p => p.id === parkApiId);
-        return livePark && livePark.crowdlevel !== undefined ? livePark.crowdlevel : null;
+        
+        // Abfrage auf crowd_level mit Unterstrich angepasst!
+        if (livePark && livePark.crowd_level !== undefined && livePark.crowd_level !== null) {
+            // Konvertiert den Float-Wert (z.B. 12.43) in eine lesbare Ganzzahl (12%)
+            return Math.round(parseFloat(livePark.crowd_level));
+        }
     }
     return null;
 }
