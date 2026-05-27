@@ -1,7 +1,3 @@
-// ==========================================================================
-// DIE REINEN DATEN: FERIEN, PARKS (MIT API-IDS) & FEIERTAGE 2026
-// ==========================================================================
-
 const FERIEN_DATEN = {
     "Baden-Württemberg": [
         { start: new Date(2026, 2, 30), ende: new Date(2026, 3, 11) }, 
@@ -132,20 +128,19 @@ const FERIEN_DATEN = {
     ]
 };
 
-// JETZT NEU MIT API-IDS: Verknüpfung zu den Endpunkten von api.wartezeiten.app
 const TOP_PARKS = [
-    { name: "Europa-Park", ort: "Rust", bundesland: "Baden-Württemberg", url: "https://www.europapark.de", apiId: "europa-park" },
-    { name: "Phantasialand", ort: "Brühl", bundesland: "Nordrhein-Westfalen", url: "https://www.phantasialand.de", apiId: "phantasialand" },
-    { name: "Heide Park Resort", ort: "Soltau", bundesland: "Niedersachsen", url: "https://www.heide-park.de", apiId: "heide-park" },
-    { name: "Hansa-Park", ort: "Sierksdorf", bundesland: "Schleswig-Holstein", url: "https://www.hansapark.de", apiId: "hansa-park" },
-    { name: "Erlebnispark Tripsdrill", ort: "Cleebronn", bundesland: "Baden-Württemberg", url: "https://tripsdrill.de", apiId: "tripsdrill" },
-    { name: "Legoland Deutschland", ort: "Günzburg", bundesland: "Bayern", url: "https://www.legoland.de", apiId: "legoland-deutschland" },
-    { name: "Movie Park Germany", ort: "Bottrop", bundesland: "Nordrhein-Westfalen", url: "https://www.movieparkgermany.de", apiId: "movie-park-germany" },
-    { name: "Plopsaland (Holiday Park)", ort: "Haßloch", bundesland: "Rheinland-Pfalz", url: "https://www.holidaypark.de", apiId: "holiday-park" },
+    { name: "Europa-Park", ort: "Rust", bundesland: "Baden-Württemberg", url: "https://www.europapark.de" },
+    { name: "Phantasialand", ort: "Brühl", bundesland: "Nordrhein-Westfalen", url: "https://www.phantasialand.de" },
+    { name: "Heide Park Resort", ort: "Soltau", bundesland: "Niedersachsen", url: "https://www.heide-park.de" },
+    { name: "Hansa-Park", ort: "Sierksdorf", bundesland: "Schleswig-Holstein", url: "https://www.hansapark.de" },
+    { name: "Erlebnispark Tripsdrill", ort: "Cleebronn", bundesland: "Baden-Württemberg", url: "https://tripsdrill.de" },
+    { name: "Legoland Deutschland", ort: "Günzburg", bundesland: "Bayern", url: "https://www.legoland.de" },
+    { name: "Movie Park Germany", ort: "Bottrop", bundesland: "Nordrhein-Westfalen", url: "https://www.movieparkgermany.de" },
+    { name: "Plopsaland (Holiday Park)", ort: "Haßloch", bundesland: "Rheinland-Pfalz", url: "https://www.holidaypark.de" },
     { name: "Serengeti-Park", ort: "Hodenhagen", bundesland: "Niedersachsen", url: "https://www.serengeti-park.de" },
     { name: "Bayern-Park", ort: "Reisbach", bundesland: "Bayern", url: "https://www.bayern-park.de" },
-    { name: "Belantis", ort: "Leipzig", bundesland: "Sachsen", url: "https://www.belantis.de", apiId: "belantis" },
-    { name: "Fort Fun Abenteuerland", ort: "Bestwig", bundesland: "Nordrhein-Westfalen", url: "https://fortfun.de", apiId: "fort-fun-abenteuerland" },
+    { name: "Belantis", ort: "Leipzig", bundesland: "Sachsen", url: "https://www.belantis.de" },
+    { name: "Fort Fun Abenteuerland", ort: "Bestwig", bundesland: "Nordrhein-Westfalen", url: "https://fortfun.de" },
     { name: "Freizeitpark Plohn", ort: "Lengenfeld", bundesland: "Sachsen", url: "https://www.freizeitpark-plohn.de" },
     { name: "Karls Erlebnis-Dorf", ort: "Rövershagen", bundesland: "Mecklenburg-Vorpommern", url: "https://karls.de/roevershagen" },
     { name: "Skyline Park", ort: "Rammingen", bundesland: "Bayern", url: "https://www.skylinepark.de" },
