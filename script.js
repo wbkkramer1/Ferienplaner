@@ -1,9 +1,8 @@
 // Globale Zustände
-let aktuellesDatum = new Date(2026, 4, 27); // Fixiert auf den 27. Mai 2026
+let aktuellesDatum = new Date(2026, 4, 27); // 27. Mai 2026
 let ausgewaehltesBundesland = "Mecklenburg-Vorpommern";
 let ganzeWochePruefen = false;
 let apiLiveDaten = null; 
-let apiGeladen = false;
 
 const MONATS_NAMEN = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 const WOCHEN_TAGE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
@@ -76,54 +75,41 @@ function formatiereSpanne(datum) {
     return `${t}.${m}.`;
 }
 
-// Dynamischer Live-Abruf über sicheren HTTPS-Tunnel
+// FIX: Direkte, native Anbindung ohne blockierende Drittanbieter-Proxys
 async function ladeLiveCrowdDaten() {
-    const targetUrl = 'https://api.wartezeiten.app/v1/parks';
-    
-    setTimeout(() => {
-        if (!apiGeladen) {
-            console.log("API-Verbindung verlangsamt. Zeige Prognose-Modus.");
+    try {
+        const response = await fetch('https://api.wartezeiten.app/v1/crowdlevel');
+        if (response.ok) {
+            apiLiveDaten = await response.json();
+            console.log("API nativ geladen!", apiLiveDaten);
             updateDashboard();
         }
-    }, 4000);
-
-    try {
-        // AllOrigins wird über einen verschlüsselten HTTPS-Bypass geholt, der JSON direkt zurückgibt
-        const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
-        if (response.ok) {
-            const dataWrapper = await response.json();
-            if (dataWrapper.contents) {
-                const parsedData = JSON.parse(dataWrapper.contents);
-                
-                // Wir validieren, ob es sich um die echte Park-Liste handelt
-                if (parsedData && Array.isArray(parsedData) && parsedData.length > 0) {
-                    apiLiveDaten = parsedData;
-                    apiGeladen = true;
-                    console.log("Live-Daten erfolgreich geladen!", apiLiveDaten);
-                }
-                updateDashboard();
-                return;
-            }
-        }
     } catch (fehler) {
-        console.error("Fehler beim API-Abruf:", fehler);
-        updateDashboard();
+        console.error("Direkter API-Abruf blockiert, versuche Ausweich-Proxy...", fehler);
+        // Falls der Browser meckert, greift sofort der saubere Fallback-Proxy
+        try {
+            const resProxy = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://api.wartezeiten.app/v1/crowdlevel'));
+            if (resProxy.ok) {
+                const wrap = await resProxy.json();
+                apiLiveDaten = JSON.parse(wrap.contents);
+                updateDashboard();
+            }
+        } catch (e) {
+            console.log("API temporär offline. Lokale Prognosen aktiv.");
+        }
     }
 }
 
-// Liest den crowd_level flexibel aus der Live-API aus
 function holeLiveProzentwert(parkApiId) {
-    if (!apiLiveDaten || !parkApiId || !Array.isArray(apiLiveDaten)) return null;
+    if (!apiLiveDaten || !parkApiId) return null;
     
-    if (aktuellesDatum.getDate() === 27 && aktuellesDatum.getMonth() === 4) {
-        const livePark = apiLiveDaten.find(p => p && p.id === parkApiId);
-        
-        if (livePark) {
-            // Die API liefert crowd_level im Objekt. Wir fangen alle Schreibweisen ab.
-            const level = livePark.crowd_level !== undefined ? livePark.crowd_level : livePark.crowdlevel;
-            if (level !== undefined && level !== null) {
-                return Math.round(parseFloat(level));
-            }
+    const heuteSicherStr = zuLokalemIsoString(new Date(2026, 4, 27)); 
+    const zielSicherStr = zuLokalemIsoString(aktuellesDatum);
+    
+    if (heuteSicherStr === zielSicherStr) {
+        const livePark = apiLiveDaten.find(p => p.id === parkApiId);
+        if (livePark && livePark.crowdlevel !== undefined && livePark.crowdlevel !== null) {
+            return livePark.crowdlevel;
         }
     }
     return null;
@@ -161,8 +147,8 @@ window.addEventListener('DOMContentLoaded', () => {
     baueKalender();
     initMapHover(); 
     
-    updateDashboard(); 
-    ladeLiveCrowdDaten(); 
+    updateDashboard();
+    ladeLiveCrowdDaten();
 
     document.getElementById('state-select').addEventListener('change', (e) => {
         ausgewaehltesBundesland = e.target.value;
@@ -192,42 +178,53 @@ function baueKalender() {
     const container = document.getElementById('calendar-container');
     if (!container) return;
     container.innerHTML = '';
+
     for (let monat = 0; monat < 12; monat++) {
         const monatsBox = document.createElement('div');
         monatsBox.className = 'month-box';
+
         const titel = document.createElement('div');
         titel.className = 'month-title';
         titel.textContent = MONATS_NAMEN[monat];
         monatsBox.appendChild(titel);
+
         const grid = document.createElement('div');
         grid.className = 'days-grid';
+
         WOCHEN_TAGE.forEach(tag => {
             const h = document.createElement('div');
             h.className = 'day-header';
             h.textContent = tag;
             grid.appendChild(h);
         });
+
         const ersterTag = new Date(2026, monat, 1);
         let startSpalte = ersterTag.getDay() - 1; 
         if (startSpalte === -1) startSpalte = 6;
+
         for (let i = 0; i < startSpalte; i++) {
             const emptyCell = document.createElement('div');
             emptyCell.className = 'day-cell empty';
             grid.appendChild(emptyCell);
         }
+
         const tageImMonat = new Date(2026, monat + 1, 0).getDate();
         for (let tag = 1; tag <= tageImMonat; tag++) {
             const zelle = document.createElement('div');
             zelle.className = 'day-cell';
             zelle.textContent = tag;
+            
             zelle.dataset.dateString = `2026-${String(monat + 1).padStart(2,'0')}-${String(tag).padStart(2,'0')}`;
+
             zelle.addEventListener('click', () => {
                 const parts = zelle.dataset.dateString.split('-');
                 aktuellesDatum = new Date(parts[0], parts[1] - 1, parts[2]);
                 updateDashboard();
             });
+
             grid.appendChild(zelle);
         }
+
         monatsBox.appendChild(grid);
         container.appendChild(monatsBox);
     }
@@ -245,16 +242,21 @@ function initMapHover() {
                 document.getElementById('info-box').textContent = `${blName}: ${hatFerien ? 'Ferienbetrieb (Voll)' : 'Reguläre Schulzeit (Frei)'}`;
             }
         });
-        pin.addEventListener('mouseleave', () => { pruefeInfoboxText(); });
+        pin.addEventListener('mouseleave', () => {
+            pruefeInfoboxText();
+        });
     });
+
     document.querySelectorAll('.park-pin').forEach(pin => {
         const parkName = pin.getAttribute('data-park');
+        
         pin.addEventListener('mouseenter', () => {
             const parkGefunden = TOP_PARKS.find(p => p.name === parkName);
             if (parkGefunden) {
                 const status = berechneParkAuslastung(parkGefunden, [aktuellesDatum]);
                 const liveProzent = holeLiveProzentwert(parkGefunden.apiId);
                 let statusText = "";
+                
                 if (liveProzent !== null) {
                     statusText = `LIVE: ${liveProzent}% Auslastung`;
                 } else {
@@ -267,44 +269,62 @@ function initMapHover() {
                     }
                     if (status === "leer") statusText = `Leer (Freie Fahrt!)`;
                 }
+                
                 document.getElementById('info-box').textContent = `${parkGefunden.name} (${parkGefunden.ort}) • ${statusText} • [Klicken für Website]`;
             }
         });
-        pin.addEventListener('mouseleave', () => { pruefeInfoboxText(); });
+        
+        pin.addEventListener('mouseleave', () => {
+            pruefeInfoboxText();
+        });
+
         pin.addEventListener('click', () => {
             const parkGefunden = TOP_PARKS.find(p => p.name === parkName);
-            if (parkGefunden && parkGefunden.url) { window.open(parkGefunden.url, '_blank'); }
+            if (parkGefunden && parkGefunden.url) {
+                window.open(parkGefunden.url, '_blank');
+            }
         });
     });
 }
 
 function pruefeInfoboxText() {
-    if (aktuellesDatum.getDate() === 27 && aktuellesDatum.getMonth() === 4) {
-        if (apiGeladen) {
+    let testTage = [aktuellesDatum];
+    if (ganzeWochePruefen) {
+        testTage = [];
+        for (let i = 0; i < 7; i++) {
+            let d = new Date(aktuellesDatum);
+            d.setDate(d.getDate() + i);
+            testTage.push(d);
+        }
+    }
+    
+    const heuteStrIso = zuLokalemIsoString(new Date(2026, 4, 27));
+    const zielStrIso = zuLokalemIsoString(aktuellesDatum);
+    if (heuteStrIso === zielStrIso) {
+        if (apiLiveDaten) {
             document.getElementById('info-box').textContent = `⚡ Live-Modus aktiv: Unterstützte Parks zeigen die prozentuale Echtzeit-Auslastung der API.`;
         } else {
-            document.getElementById('info-box').textContent = `🔮 Prognose-Modus aktiv. (Kalender-Berechnung)`;
+            document.getElementById('info-box').textContent = `🔮 Prognose-Modus: Verbinde nativ mit Wartezeiten-Server...`;
         }
         return;
     }
+
     const feiertagName = holeFeiertagsNameFuerLand(aktuellesDatum, ausgewaehltesBundesland);
     if (feiertagName && !ganzeWochePruefen) {
         document.getElementById('info-box').textContent = `🗓️ Gesetzlicher Feiertag in ${ausgewaehltesBundesland}: ${feiertagName}`;
         return;
     }
+
     if ((aktuellesDatum.getDay() === 0 || aktuellesDatum.getDay() === 6) && !ganzeWochePruefen) {
         document.getElementById('info-box').textContent = `Wochenende am ${formatiereDatumKurz(aktuellesDatum)} • Erhöhtes Basisaufkommen in allen Freizeitparks.`;
         return;
     }
-    let testTage = [aktuellesDatum];
-    if (ganzeWochePruefen) {
-        testTage = [];
-        for (let i = 0; i < 7; i++) {
-            let d = new Date(aktuellesDatum); d.setDate(d.getDate() + i); testTage.push(d);
-        }
-    }
+
     let ferienZaehler = 0;
-    Object.keys(FERIEN_DATEN).forEach(bl => { if (testTage.some(tt => istInFerien(bl, tt))) ferienZaehler++; });
+    Object.keys(FERIEN_DATEN).forEach(bl => {
+        if (testTage.some(tt => istInFerien(bl, tt))) ferienZaehler++;
+    });
+
     document.getElementById('info-box').textContent = ganzeWochePruefen 
         ? `In der Woche vom ${formatiereDatumKurz(aktuellesDatum)} bis ${formatiereDatumKurz(testTage[6])} haben ${ferienZaehler} von 16 Bundesländern Ferien.`
         : `Am ${formatiereDatumKurz(aktuellesDatum)} haben ${ferienZaehler} von 16 Bundesländern Ferien.`;
@@ -312,38 +332,49 @@ function pruefeInfoboxText() {
 
 function updateDashboard() {
     document.getElementById('selected-date-display').textContent = formatiereDatum(aktuellesDatum);
-    
+
     let testTage = [aktuellesDatum];
     if (ganzeWochePruefen) {
         testTage = [];
         for (let i = 0; i < 7; i++) {
-            let d = new Date(aktuellesDatum); d.setDate(d.getDate() + i); testTage.push(d);
+            let d = new Date(aktuellesDatum);
+            d.setDate(d.getDate() + i);
+            testTage.push(d);
         }
     }
+
     const heuteStr = formatiereDatumKurz(new Date());
-    
+    const aktStr = zuLokalemIsoString(aktuellesDatum);
+
     document.querySelectorAll('.day-cell:not(.empty)').forEach(zelle => {
         const parts = zelle.dataset.dateString.split('-');
         const d = new Date(parts[0], parts[1] - 1, parts[2]);
+        const zelleStr = zelle.dataset.dateString;
+        
         zelle.className = 'day-cell'; 
+
         if (formatiereDatumKurz(d) === heuteStr) zelle.classList.add('today-highlight');
-        if (zelle.dataset.dateString === zuLokalemIsoString(aktuellesDatum)) zelle.classList.add('active');
+        if (zelleStr === aktStr) zelle.classList.add('active');
         if (istInFerien(ausgewaehltesBundesland, d)) zelle.classList.add('ferien-highlight');
         if (holeFeiertagsNameFuerLand(d, ausgewaehltesBundesland) !== null) zelle.classList.add('feiertag-highlight');
     });
 
     const laenderListe = document.getElementById('laender-liste');
     laenderListe.innerHTML = '';
+
     Object.keys(FERIEN_DATEN).sort().forEach(bl => {
         const hatFerienInSpanne = testTage.some(tt => istInFerien(bl, tt));
         const hatFeiertagHeute = testTage.some(tt => holeFeiertagsNameFuerLand(tt, bl) !== null);
+
         const zeitraum = holeAktuellenFerienZeitraum(bl, aktuellesDatum);
         let datumsText = "";
         if (zeitraum) {
             datumsText = `<span class="park-ort" style="display:block; margin-top:2px;">${formatiereSpanne(zeitraum.start)} – ${formatiereSpanne(zeitraum.ende)}</span>`;
         }
+
         const item = document.createElement('div');
         item.className = `land-item ${hatFerienInSpanne || hatFeiertagHeute ? 'ferien' : ''}`;
+
         item.innerHTML = `
             <div class="park-info">
                 <span class="park-name">${bl}</span>
@@ -352,6 +383,7 @@ function updateDashboard() {
             <span class="status-badge">${hatFeiertagHeute ? 'Feiertag' : (hatFerienInSpanne ? 'Ferien' : 'Schule')}</span>
         `;
         laenderListe.appendChild(item);
+
         document.querySelectorAll('.ferien-pin').forEach(pin => {
             if (pin.getAttribute('data-land') === bl) {
                 pin.className = "ferien-pin";
@@ -364,44 +396,46 @@ function updateDashboard() {
 
     const parksListe = document.getElementById('parks-liste');
     parksListe.innerHTML = '';
-    
-    if (Array.isArray(TOP_PARKS)) {
-        TOP_PARKS.forEach(park => {
-            const auslastung = berechneParkAuslastung(park, testTage);
-            const liveProzent = holeLiveProzentwert(park.apiId);
-            const parkItem = document.createElement('div');
-            parkItem.className = `park-item ${auslastung === 'voll' ? 'ferien' : (auslastung === 'maessig' ? 'maessig' : '')}`;
-            
-            let badgeText = "Leer";
-            if (auslastung === "voll") badgeText = "Voll";
-            if (auslastung === "maessig") badgeText = "Mäßig";
-            if (liveProzent !== null) badgeText = `${liveProzent}%`;
 
-            const istLive = (aktuellesDatum.getDate() === 27 && aktuellesDatum.getMonth() === 4 && apiLiveDaten && park.apiId);
-            parkItem.innerHTML = `
-                <div class="park-info">
-                    <span class="park-name">${park.name}${istLive ? ' ⚡' : ''}</span>
-                    <span class="park-ort">${park.ort} (${park.bundesland})</span>
-                </div>
-                <span class="park-status-badge state-${auslastung}">${badgeText}</span>
-            `;
-            parksListe.appendChild(parkItem);
+    TOP_PARKS.forEach(park => {
+        const auslastung = berechneParkAuslastung(park, testTage);
+        const liveProzent = holeLiveProzentwert(park.apiId);
+        
+        const parkItem = document.createElement('div');
+        parkItem.className = `park-item ${auslastung === 'voll' ? 'ferien' : (auslastung === 'maessig' ? 'maessig' : '')}`;
+        
+        let badgeText = "Leer";
+        if (auslastung === "voll") badgeText = "Voll";
+        if (auslastung === "maessig") badgeText = "Mäßig";
+        if (liveProzent !== null) badgeText = `${liveProzent}%`;
 
-            parkItem.addEventListener('click', () => {
-                const selectElement = document.getElementById('state-select');
-                if (selectElement) selectElement.value = park.bundesland;
-                ausgewaehltesBundesland = park.bundesland;
-                updateDashboard();
-            });
+        const heuteStrIso = zuLokalemIsoString(new Date(2026, 4, 27));
+        const zielStrIso = zuLokalemIsoString(aktuellesDatum);
+        const istLive = (heuteStrIso === zielStrIso && apiLiveDaten && park.apiId);
 
-            document.querySelectorAll('.park-pin').forEach(pin => {
-                if (pin.getAttribute('data-park') === park.name) {
-                    pin.className = "park-pin"; 
-                    if (auslastung === "leer") pin.classList.add('leuchtet-gruen');
-                    if (auslastung === "maessig") pin.classList.add('leuchtet-gelb');
-                    if (auslastung === "voll") pin.classList.add('leuchtet-rot');
-                }
-            });
+        parkItem.innerHTML = `
+            <div class="park-info">
+                <span class="park-name">${park.name}${istLive ? ' ⚡' : ''}</span>
+                <span class="park-ort">${park.ort} (${park.bundesland})</span>
+            </div>
+            <span class="park-status-badge state-${auslastung}">${badgeText}</span>
+        `;
+        
+        parksListe.appendChild(parkItem);
+
+        parkItem.addEventListener('click', () => {
+            document.getElementById('state-select').value = park.bundesland;
+            ausgewaehltesBundesland = park.bundesland;
+            updateDashboard();
         });
-    }
+
+        document.querySelectorAll('.park-pin').forEach(pin => {
+            if (pin.getAttribute('data-park') === park.name) {
+                pin.className = "park-pin"; 
+                if (auslastung === "leer") pin.classList.add('leuchtet-gruen');
+                if (auslastung === "maessig") pin.classList.add('leuchtet-gelb');
+                if (auslastung === "voll") pin.classList.add('leuchtet-rot');
+            }
+        });
+    });
 }
