@@ -76,9 +76,10 @@ function formatiereSpanne(datum) {
     return `${t}.${m}.`;
 }
 
-// FIX: Nutzt jetzt den unblockierten Raw-Endpunkt von AllOrigins
+// Lädt die Live-Daten über AllOrigins, tarnt die Parameter aber direkt in der URL String-Kette
 async function ladeLiveCrowdDaten() {
-    const targetUrl = 'https://api.wartezeiten.app/v1/parks';
+    // Wir hängen die Parameter direkt hinten an die URL an, um die CORS-Header-Sperre komplett zu umgehen!
+    const targetUrl = 'https://api.wartezeiten.app/v1/parks?language=de&accept=application/json';
     
     setTimeout(() => {
         if (!apiGeladen) {
@@ -88,21 +89,23 @@ async function ladeLiveCrowdDaten() {
     }, 4000);
 
     try {
-        // Der 'raw'-Endpunkt schickt die Daten unzensiert eins zu eins durch
-        const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`);
+        const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
         if (response.ok) {
-            const parsedData = await response.json();
-            
-            if (parsedData && !parsedData.error && Array.isArray(parsedData)) {
-                apiLiveDaten = parsedData;
-                apiGeladen = true;
-                console.log("Live-Daten über HTTPS-Bypass erfolgreich geladen!", apiLiveDaten);
+            const dataWrapper = await response.json();
+            if (dataWrapper.contents) {
+                const parsedData = JSON.parse(dataWrapper.contents);
+                
+                if (parsedData && !parsedData.error && Array.isArray(parsedData)) {
+                    apiLiveDaten = parsedData;
+                    apiGeladen = true;
+                    console.log("Live-Daten erfolgreich geladen und im Dashboard aktiviert!", apiLiveDaten);
+                }
+                updateDashboard();
+                return;
             }
-            updateDashboard();
-            return;
         }
     } catch (fehler) {
-        console.error("Sämtliche Proxys blockiert. Nutze lokalen Prognose-Modus.", fehler);
+        console.error("Netzwerk-Fehler beim Laden über AllOrigins-Bypass.", fehler);
         updateDashboard();
     }
 }
@@ -115,7 +118,7 @@ function holeLiveProzentwert(parkApiId) {
         const livePark = apiLiveDaten.find(p => p && p.id === parkApiId);
         
         if (livePark) {
-            // Flexibler Fallback für unterschiedliche Benennungen der API
+            // Unterstützt flexibel beide Schreibweisen (mit und ohne Unterstrich)
             const level = livePark.crowd_level !== undefined ? livePark.crowd_level : livePark.crowdlevel;
             if (level !== undefined && level !== null) {
                 return Math.round(parseFloat(level));
@@ -277,7 +280,7 @@ function initMapHover() {
 function pruefeInfoboxText() {
     if (aktuellesDatum.getDate() === 27 && aktuellesDatum.getMonth() === 4) {
         if (apiGeladen) {
-            document.getElementById('info-box').textContent = `⚡ Live-Modus active: Unterstützte Parks zeigen die prozentuale Echtzeit-Auslastung der API.`;
+            document.getElementById('info-box').textContent = `⚡ Live-Modus aktiv: Unterstützte Parks zeigen die prozentuale Echtzeit-Auslastung der API.`;
         } else {
             document.getElementById('info-box').textContent = `🔮 Prognose-Modus aktiv. (Kalender-Berechnung)`;
         }
