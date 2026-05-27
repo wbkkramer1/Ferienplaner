@@ -76,7 +76,7 @@ function formatiereSpanne(datum) {
     return `${t}.${m}.`;
 }
 
-// Lädt die Daten über AllOrigins, um CORS-Sperren auf GitHub Pages zu umgehen
+// Lädt die Daten über den AllOrigins-Bypass im Hintergrund
 async function ladeLiveCrowdDaten() {
     const targetUrl = 'https://api.wartezeiten.app/v1/parks';
     
@@ -104,11 +104,10 @@ async function ladeLiveCrowdDaten() {
     }
 }
 
-// Holt den Prozentwert aus dem AllOrigins-Datenpaket (mit zusätzlichem ID-Schutz)
+// Extrahiert den gerundeten Wert aus dem Feld 'crowd_level'
 function holeLiveProzentwert(parkApiId) {
     if (!apiLiveDaten || !parkApiId || !Array.isArray(apiLiveDaten)) return null;
     
-    // Prüft tagesgenau auf den 27. Mai
     if (aktuellesDatum.getDate() === 27 && aktuellesDatum.getMonth() === 4) {
         const livePark = apiLiveDaten.find(p => p && p.id === parkApiId);
         
