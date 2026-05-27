@@ -102,44 +102,86 @@
         <div class="prozent" id="wert">--</div>
     </div>
 
-    <div class="status-text" id="status">Bereite Test-Modus vor...</div>
+    <div class="status-text" id="status">Lade Live-Daten...</div>
     
-    <button class="button" onclick="simuliereDaten()">(Test) Wert würfeln</button>
+    <button class="button" onclick="holeEuropaParkDaten()">Jetzt aktualisieren</button>
     <div class="update-zeit" id="zeit" style="margin-top: 1rem;"></div>
 </div>
 
 <script>
-    function simuliereDaten() {
+    async function holeEuropaParkDaten() {
         const wertAnzeige = document.getElementById('wert');
         const statusAnzeige = document.getElementById('status');
         const kreis = document.getElementById('kreis');
         const zeitAnzeige = document.getElementById('zeit');
+        
+        wertAnzeige.innerText = "⏳";
+        statusAnzeige.innerText = "Verbindung wird aufgebaut...";
+        
+        const url = 'https://queue-times.com/parks/51/queue_times.json';
+        
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('API antwortet nicht');
+            
+            const data = await response.json();
+            let prozentwert = null;
 
-        // Generiert einen zufälligen Prozentwert zwischen 10% und 95%
-        const prozentwert = Math.floor(Math.random() * 86) + 10;
+            // SCHRITT 1: Versuche die Auslastung über die einzelnen Attraktionen zu berechnen
+            if (data && data.rides && data.rides.length > 0) {
+                const geoeffneteAttraktionen = data.rides.filter(r => r.is_open === true);
+                
+                if (geoeffneteAttraktionen.length > 0) {
+                    const gesamtWartezeit = geoeffneteAttraktionen.reduce((sum, r) => sum + r.wait_time, 0);
+                    const durchschnitt = gesamtWartezeit / geoeffneteAttraktionen.length;
+                    prozentwert = Math.round((durchschnitt / 90) * 100);
+                }
+            }
 
-        wertAnzeige.innerHTML = `${prozentwert}<span style="font-size: 1.5rem;">%</span>`;
+            // SCHRITT 2: Fallback – Wenn Schritt 1 fehlschlägt, nimm das globale 'crowd_level' der API
+            if ((prozentwert === null || prozentwert === 0) && data && data.crowd_level !== undefined) {
+                prozentwert = Math.round(parseFloat(data.crowd_level));
+            }
 
-        if (prozentwert >= 65) {
-            statusAnzeige.innerText = "Aktuell sehr voll!";
+            // SCHRITT 3: Falls immer noch kein Wert da ist (z. B. ganz frühe Morgenstunden), setzen wir ein Basisrauschen
+            if (prozentwert === null || prozentwert === 0) {
+                prozentwert = 15; 
+            }
+
+            // Begrenzung auf maximal 100%
+            if (prozentwert > 100) prozentwert = 100;
+
+            // UI rendern
+            wertAnzeige.innerHTML = `${prozentwert}<span style="font-size: 1.5rem;">%</span>`;
+            
+            if (prozentwert >= 60) {
+                statusAnzeige.innerText = "Sehr voll (Lange Wartezeiten)";
+                statusAnzeige.style.color = "var(--state-voll)";
+                kreis.style.borderColor = "var(--state-voll)";
+            } else if (prozentwert >= 30) {
+                statusAnzeige.innerText = "Mäßig besucht (Normalbetrieb)";
+                statusAnzeige.style.color = "var(--state-maessig)";
+                kreis.style.borderColor = "var(--state-maessig)";
+            } else {
+                statusAnzeige.innerText = "Sehr leer (Freie Fahrt!)";
+                statusAnzeige.style.color = "var(--state-leer)";
+                kreis.style.borderColor = "var(--state-leer)";
+            }
+            
+            const jetzt = new Date();
+            zeitAnzeige.innerText = `Zuletzt aktualisiert: ${jetzt.toLocaleTimeString('de-DE')} Uhr`;
+            
+        } catch (fehler) {
+            console.error(fehler);
+            wertAnzeige.innerText = "❌";
+            statusAnzeige.innerText = "Verbindung fehlgeschlagen.";
             statusAnzeige.style.color = "var(--state-voll)";
-            kreis.style.borderColor = "var(--state-voll)";
-        } else if (prozentwert >= 35) {
-            statusAnzeige.innerText = "Mäßiger Betrieb.";
-            statusAnzeige.style.color = "var(--state-maessig)";
-            kreis.style.borderColor = "var(--state-maessig)";
-        } else {
-            statusAnzeige.innerText = "Freie Fahrt! Der Park ist leer.";
-            statusAnzeige.style.color = "var(--state-leer)";
-            kreis.style.borderColor = "var(--state-leer)";
+            kreis.style.borderColor = "#eee";
+            zeitAnzeige.innerText = "Bitte überprüfe deine Internetverbindung.";
         }
-
-        const jetzt = new Date();
-        zeitAnzeige.innerText = `Lokaler Test-Modus um: ${jetzt.toLocaleTimeString('de-DE')} Uhr`;
     }
 
-    // Direkt beim Start einmal ausführen
-    document.addEventListener('DOMContentLoaded', simuliereDaten);
+    document.addEventListener('DOMContentLoaded', holeEuropaParkDaten);
 </script>
 
 </body>
