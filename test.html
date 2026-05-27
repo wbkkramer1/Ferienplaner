@@ -125,30 +125,46 @@
             if (!response.ok) throw new Error('API antwortet nicht');
             
             const data = await response.json();
+            let alleAttraktionen = [];
+
+            // Korrektur: Wir sammeln alle Attraktionen aus den einzelnen 'lands' ein
+            if (data && data.lands && Array.isArray(data.lands)) {
+                data.lands.forEach(land => {
+                    if (land.rides && Array.isArray(land.rides)) {
+                        alleAttraktionen = alleAttraktionen.concat(land.rides);
+                    }
+                });
+            } 
+            // Falls sie doch mal flach als 'rides' kommen:
+            else if (data && data.rides && Array.isArray(data.rides)) {
+                alleAttraktionen = data.rides;
+            }
+
             let prozentwert = null;
 
-            // SCHRITT 1: Versuche die Auslastung über die einzelnen Attraktionen zu berechnen
-            if (data && data.rides && data.rides.length > 0) {
-                const geoeffneteAttraktionen = data.rides.filter(r => r.is_open === true);
+            // Durchschnittliche Wartezeit berechnen
+            if (alleAttraktionen.length > 0) {
+                const geoeffneteAttraktionen = alleAttraktionen.filter(r => r.is_open === true);
                 
                 if (geoeffneteAttraktionen.length > 0) {
                     const gesamtWartezeit = geoeffneteAttraktionen.reduce((sum, r) => sum + r.wait_time, 0);
                     const durchschnitt = gesamtWartezeit / geoeffneteAttraktionen.length;
-                    prozentwert = Math.round((durchschnitt / 90) * 100);
+                    
+                    // Umrechnung: 45 Minuten Schnitt = 100% Auslastung (realistischerer Richtwert)
+                    prozentwert = Math.round((durchschnitt / 45) * 100);
                 }
             }
 
-            // SCHRITT 2: Fallback – Wenn Schritt 1 fehlschlägt, nimm das globale 'crowd_level' der API
+            // Fallback auf globales crowd_level der API, falls vorhanden
             if ((prozentwert === null || prozentwert === 0) && data && data.crowd_level !== undefined) {
                 prozentwert = Math.round(parseFloat(data.crowd_level));
             }
 
-            // SCHRITT 3: Falls immer noch kein Wert da ist (z. B. ganz frühe Morgenstunden), setzen wir ein Basisrauschen
+            // Letzter Notfall-Fallback
             if (prozentwert === null || prozentwert === 0) {
-                prozentwert = 15; 
+                prozentwert = 25; 
             }
 
-            // Begrenzung auf maximal 100%
             if (prozentwert > 100) prozentwert = 100;
 
             // UI rendern
