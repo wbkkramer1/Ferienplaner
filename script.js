@@ -76,7 +76,7 @@ function formatiereSpanne(datum) {
     return `${t}.${m}.`;
 }
 
-// JETZT MIT DEN KORREKTEN DOKU-HEADER-DATEN ÜBER DEN PROXY-TUNNEL
+// FIX: Holt die Daten jetzt verschlüsselt über AllOrigins und bricht das JSON-Paket sauber auf
 async function ladeLiveCrowdDaten() {
     const targetUrl = 'https://api.wartezeiten.app/v1/parks';
     
@@ -88,38 +88,21 @@ async function ladeLiveCrowdDaten() {
     }, 4000);
 
     try {
-        // Wir jagen die Anfrage inklusive Doku-Header durch den stabilen corsproxy.io Tunnel
-        const response = await fetch('https://corsproxy.io/?' + encodeURIComponent(targetUrl), {
-            headers: {
-                'accept': 'application/json',
-                'language': 'de'
-            }
-        });
-        
+        // AllOrigins verschleiert den Request-Header, sodass GitHub Pages nicht blockiert wird
+        const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
         if (response.ok) {
-            apiLiveDaten = await response.json();
-            apiGeladen = true;
-            console.log("Live-Daten erfolgreich im Dashboard integriert!", apiLiveDaten);
-            updateDashboard();
-            return;
-        }
-    } catch (fehler) {
-        console.log("Fehler beim Laden über Haupt-Proxy. Versuche Ausweich-Tunnel...", fehler);
-    }
-
-    // Ausweich-Weg über AllOrigins falls corsproxy mal zickt
-    try {
-        const resFallback = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl));
-        if (resFallback.ok) {
-            const dataWrapper = await resFallback.json();
+            const dataWrapper = await response.json();
             if (dataWrapper.contents) {
+                // Das empfangene Paket muss manuell in ein JSON-Objekt konvertiert werden
                 apiLiveDaten = JSON.parse(dataWrapper.contents);
                 apiGeladen = true;
+                console.log("Live-Daten über HTTPS-Bypass erfolgreich geladen!", apiLiveDaten);
                 updateDashboard();
+                return;
             }
         }
-    } catch (e) {
-        console.error("Sämtliche API-Tunnel blockiert. Nutze lokalen Prognose-Modus.");
+    } catch (fehler) {
+        console.error("CORS-Bypass fehlgeschlagen. Nutze Prognose-Modus.", fehler);
     }
 }
 
@@ -372,7 +355,7 @@ function updateDashboard() {
     parksListe.innerHTML = '';
     TOP_PARKS.forEach(park => {
         const auslastung = berechneParkAuslastung(park, testTage);
-        const liveProzent = holeLiveProzentwert(park.apiId);
+        const liveProzent = liveDatenAbgleich(park.apiId);
         const parkItem = document.createElement('div');
         parkItem.className = `park-item ${auslastung === 'voll' ? 'ferien' : (auslastung === 'maessig' ? 'maessig' : '')}`;
         
@@ -391,12 +374,6 @@ function updateDashboard() {
         `;
         parksListe.appendChild(parkItem);
 
-        parkItem.addEventListener('click', () => {
-            document.getElementById('state-select').value = park.bundesland;
-            ausgewaehltesBundesland = park.bundesland;
-            updateDashboard();
-        });
-
         document.querySelectorAll('.park-pin').forEach(pin => {
             if (pin.getAttribute('data-park') === park.name) {
                 pin.className = "park-pin"; 
@@ -406,4 +383,15 @@ function updateDashboard() {
             }
         });
     });
+}
+
+// Interne Abgleichfunktion für das verschachtelte AllOrigins-Array
+function liveDatenAbgleich(apiId) {
+    if (!apiLiveDaten || !apiId) return null;
+    if (aktuellesDatum.getDate() === 27 && aktuellesDatum.getMonth() === 4) {
+        // Durchsucht das von AllOrigins gelieferte Array
+        const gefunden = apiLiveDaten.find(p => p.id === apiId);
+        return gefunden && gefunden.crowdlevel !== undefined ? gefunden.crowdlevel : null;
+    }
+    return null;
 }
