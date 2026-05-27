@@ -2,21 +2,8 @@
 let aktuellesDatum = new Date(2026, 4, 27); // Fixiert auf den 27. Mai 2026
 let ausgewaehltesBundesland = "Mecklenburg-Vorpommern";
 let ganzeWochePruefen = false;
-
-// ==========================================================================
-// ECHTE LIVE-DATEN DER API VOM 27. MAI 2026 (DIREKT-INJEKTION)
-// ==========================================================================
-let apiGeladen = true; // Schaltet den Live-Modus im Dashboard sofort scharf
-let apiLiveDaten = [
-    { id: "europapark", name: "Europa-Park", land: "Deutschland", crowd_level: 48 },
-    { id: "phantasialand", name: "Phantasialand", land: "Deutschland", crowd_level: 32 },
-    { id: "heidepark", name: "Heide Park", land: "Deutschland", crowd_level: 25 },
-    { id: "hansapark", name: "HANSA-PARK", land: "Deutschland", crowd_level: 18 },
-    { id: "movieparkgermany", name: "Movie Park Germany", land: "Deutschland", crowd_level: 22 },
-    { id: "legoland", name: "Legoland", land: "Deutschland", crowd_level: 55 },
-    { id: "plopsalanddeutschland", name: "Plopsaland Deutschland", land: "Deutschland", crowd_level: 38 },
-    { id: "rulantica", name: "Rulantica", land: "Deutschland", crowd_level: 40 }
-];
+let apiLiveDaten = null; 
+let apiGeladen = false;
 
 const MONATS_NAMEN = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 const WOCHEN_TAGE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
@@ -89,20 +76,54 @@ function formatiereSpanne(datum) {
     return `${t}.${m}.`;
 }
 
-// Dummy-Funktion, da die Daten jetzt bereits oben geladen sind
-function ladeLiveCrowdDaten() {
-    console.log("Ausfallsicherer Live-Modus über Direkt-Injektion aktiv.");
-    updateDashboard();
+// Dynamischer Live-Abruf über sicheren HTTPS-Tunnel
+async function ladeLiveCrowdDaten() {
+    const targetUrl = 'https://api.wartezeiten.app/v1/parks';
+    
+    setTimeout(() => {
+        if (!apiGeladen) {
+            console.log("API-Verbindung verlangsamt. Zeige Prognose-Modus.");
+            updateDashboard();
+        }
+    }, 4000);
+
+    try {
+        // AllOrigins wird über einen verschlüsselten HTTPS-Bypass geholt, der JSON direkt zurückgibt
+        const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
+        if (response.ok) {
+            const dataWrapper = await response.json();
+            if (dataWrapper.contents) {
+                const parsedData = JSON.parse(dataWrapper.contents);
+                
+                // Wir validieren, ob es sich um die echte Park-Liste handelt
+                if (parsedData && Array.isArray(parsedData) && parsedData.length > 0) {
+                    apiLiveDaten = parsedData;
+                    apiGeladen = true;
+                    console.log("Live-Daten erfolgreich geladen!", apiLiveDaten);
+                }
+                updateDashboard();
+                return;
+            }
+        }
+    } catch (fehler) {
+        console.error("Fehler beim API-Abruf:", fehler);
+        updateDashboard();
+    }
 }
 
-// Holt den Prozentwert tagesgenau aus unserem sicheren Objekt
+// Liest den crowd_level flexibel aus der Live-API aus
 function holeLiveProzentwert(parkApiId) {
     if (!apiLiveDaten || !parkApiId || !Array.isArray(apiLiveDaten)) return null;
     
     if (aktuellesDatum.getDate() === 27 && aktuellesDatum.getMonth() === 4) {
         const livePark = apiLiveDaten.find(p => p && p.id === parkApiId);
-        if (livePark && livePark.crowd_level !== undefined) {
-            return livePark.crowd_level;
+        
+        if (livePark) {
+            // Die API liefert crowd_level im Objekt. Wir fangen alle Schreibweisen ab.
+            const level = livePark.crowd_level !== undefined ? livePark.crowd_level : livePark.crowdlevel;
+            if (level !== undefined && level !== null) {
+                return Math.round(parseFloat(level));
+            }
         }
     }
     return null;
