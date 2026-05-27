@@ -76,10 +76,9 @@ function formatiereSpanne(datum) {
     return `${t}.${m}.`;
 }
 
-// Lädt die Live-Daten über AllOrigins, tarnt die Parameter aber direkt in der URL String-Kette
+// Ruft den nackten Endpunkt über das AllOrigins-Datenobjekt ab (Keine Header-Probleme mehr)
 async function ladeLiveCrowdDaten() {
-    // Wir hängen die Parameter direkt hinten an die URL an, um die CORS-Header-Sperre komplett zu umgehen!
-    const targetUrl = 'https://api.wartezeiten.app/v1/parks?language=de&accept=application/json';
+    const targetUrl = 'https://api.wartezeiten.app/v1/parks';
     
     setTimeout(() => {
         if (!apiGeladen) {
@@ -95,10 +94,11 @@ async function ladeLiveCrowdDaten() {
             if (dataWrapper.contents) {
                 const parsedData = JSON.parse(dataWrapper.contents);
                 
-                if (parsedData && !parsedData.error && Array.isArray(parsedData)) {
+                // Wir stellen sicher, dass ein valides Array zurückkam
+                if (parsedData && Array.isArray(parsedData) && parsedData.length > 0) {
                     apiLiveDaten = parsedData;
                     apiGeladen = true;
-                    console.log("Live-Daten erfolgreich geladen und im Dashboard aktiviert!", apiLiveDaten);
+                    console.log("Live-Daten über unkomplizierten Proxy erfolgreich geladen!", apiLiveDaten);
                 }
                 updateDashboard();
                 return;
@@ -110,7 +110,7 @@ async function ladeLiveCrowdDaten() {
     }
 }
 
-// Holt den Prozentwert tagesgenau aus der Schnittstelle
+// Sucht flexibel nach dem Prozentwert im geladenen Objekt
 function holeLiveProzentwert(parkApiId) {
     if (!apiLiveDaten || !parkApiId || !Array.isArray(apiLiveDaten)) return null;
     
