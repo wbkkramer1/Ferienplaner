@@ -1,488 +1,424 @@
-/* ==========================================================================\
-   1. APPLE STYLE BASE (LIGHT MINIMALISM)
-   ========================================================================== */
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    margin: 0; padding: 0;
-    background-color: #f5f5f7;
-    color: #1d1d1f;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    -webkit-font-smoothing: antialiased;
-}
-
-header {
-    background-color: rgba(255, 255, 255, 0.8);
-    backdrop-filter: saturate(180%) blur(20px);
-    width: 100%;
-    position: relative;
-    z-index: 1000;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.header-content {
-    max-width: 1600px;
-    margin: 0 auto;
-    padding: 12px 24px;
-}
-
-header h1 { 
-    margin: 0; 
-    font-size: 18px; \
-    font-weight: 600;
-    letter-spacing: -0.3px;
-    color: #1d1d1f;
-}
-
-header h1 span {
-    color: #0071e3;
-}
-
-/* Dashboard Layout */
-.dashboard-wrapper {
-    display: flex;
-    flex: 1;
-    padding: 16px;
-    gap: 16px;
-    height: calc(100vh - 45px);
+/* GENERAL STYLES & RESET */
+* {
     box-sizing: border-box;
-    overflow: hidden;
-}
-
-/* Apple Cards UI */
-.apple-card {
-    background: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-    border: 1px solid rgba(0, 0, 0, 0.02);
-    box-sizing: border-box;
-}
-
-/* Spaltenbreiten */
-.sidebar-left {
-    width: 280px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    flex-shrink: 0;
-}
-
-.map-area {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    padding: 16px;
-    position: relative;
-}
-
-.sidebar-right {
-    width: 540px;
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-}
-
-/* Linke Spalte Steuerung */
-.controls-inner {
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.controls-inner h2 {
     margin: 0;
-    font-size: 20px;
-    font-weight: 600;
-    letter-spacing: -0.4px;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-.state-dropdown {
-    width: 100%;
-    padding: 8px 12px;
+body {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    padding: 20px;
+    min-height: 100vh;
+}
+
+/* HEADER */
+.main-header {
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.main-header h1 {
+    font-size: 2.2rem;
+    color: #ffffff;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+/* DASHBOARD LAYOUT GRID */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 360px 1fr 340px;
+    gap: 20px;
+    align-items: start;
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
+/* PANELS BORDER & BACKGROUND */
+.sidebar-panel, .map-panel, .lists-panel {
+    background-color: #242424;
+    border-radius: 12px;
+    border: 1px solid #333333;
+    padding: 20px;
+}
+
+/* CONTROL BOX (Sidebar) */
+.control-box {
+    background-color: #2d2d2d;
+    padding: 15px;
     border-radius: 8px;
-    border: 1px solid #d2d2d7;
-    background-color: #f5f5f7;
-    font-size: 13px;
-    font-weight: 500;
-    color: #1d1d1f;
-    outline: none;
+    border: 1px solid #3d3d3d;
+    margin-bottom: 20px;
+}
+
+.control-box h2 {
+    font-size: 1.4rem;
+    color: #ffffff;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 12px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.85rem;
+    color: #aaa;
+    margin-bottom: 5px;
+}
+
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    background-color: #1a1a1a;
+    border: 1px solid #444;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 0.95rem;
     cursor: pointer;
 }
 
-.week-toggle {
+/* TOGGLE SWITCH */
+.toggle-group {
     display: flex;
     align-items: center;
     gap: 10px;
-    cursor: pointer;
-    font-size: 13px;
-    font-weight: 500;
+    margin-top: 15px;
 }
 
-/* Custom Switch */
-.week-toggle input { display: none; }
-.custom-switch {
-    width: 36px;
-    height: 20px;
-    background-color: #d2d2d7;
-    border-radius: 10px;
+.switch {
     position: relative;
-    transition: background-color 0.25s ease;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
 }
-.custom-switch::after {
-    content: '';
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background-color: white;
-    top: 2px; left: 2px;
-    transition: transform 0.25s ease;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-}
-.week-toggle input:checked + .custom-switch { background-color: #34c759; }
-.week-toggle input:checked + .custom-switch::after { transform: translateX(16px); }
 
-/* Kalender-UI */
-.yearly-calendar {
-    flex: 1;
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #444;
+    transition: .3s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .3s;
+}
+
+input:checked + .slider {
+    background-color: #3b82f6;
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px);
+}
+
+.slider.round {
+    border-radius: 24px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+.toggle-label {
+    font-size: 0.9rem;
+    color: #ddd;
+}
+
+/* JAHRESKALENDER (Sidebar) */
+.calendar-wrapper {
+    max-height: 70vh;
     overflow-y: auto;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+    padding-right: 5px;
+}
+
+.calendar-wrapper::-webkit-scrollbar {
+    width: 6px;
+}
+.calendar-wrapper::-webkit-scrollbar-thumb {
+    background-color: #444;
+    border-radius: 4px;
 }
 
 .month-box {
-    width: 100%;
+    background-color: #2d2d2d;
+    border: 1px solid #3d3d3d;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 15px;
 }
 
 .month-title {
-    font-size: 12px;
+    font-size: 1rem;
     font-weight: 600;
-    color: #86868b;
-    margin-bottom: 6px;
-    padding-left: 4px;
+    color: #fff;
+    margin-bottom: 8px;
+    text-align: center;
 }
 
 .days-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 3px;
+    gap: 4px;
+    text-align: center;
 }
 
 .day-header {
-    font-size: 10px;
-    font-weight: 500;
-    color: #86868b;
-    text-align: center;
-    padding-bottom: 2px;
+    font-size: 0.75rem;
+    color: #777;
+    font-weight: 600;
+    padding-bottom: 4px;
 }
 
 .day-cell {
-    font-size: 11px;
-    font-weight: 500;
-    text-align: center;
-    padding: 5px 0;
-    border-radius: 6px;
+    font-size: 0.85rem;
+    padding: 6px 0;
+    color: #ccc;
     cursor: pointer;
-    background-color: #f5f5f7;
-    color: #1d1d1f;
-    transition: all 0.15s ease;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.day-cell:hover:not(.empty) {
+    background-color: #444;
+    color: #fff;
 }
 
 .day-cell.empty {
-    background-color: transparent;
     cursor: default;
 }
 
-.day-cell:not(.empty):hover {
-    background-color: #e8e8ed;
-}
-
-/* Kalender-Zustände */
+/* CALENDER HIGHLIGHT QUERIES */
 .day-cell.active {
-    background-color: #0071e3 !important;
+    background-color: #3b82f6 !important;
     color: #ffffff !important;
-    font-weight: 600;
+    font-weight: bold;
 }
 
 .day-cell.ferien-highlight {
-    background-color: rgba(255, 59, 48, 0.12);
-    color: #ff3b30;
-    font-weight: 600;
+    background-color: rgba(239, 68, 68, 0.25);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.4);
 }
 
 .day-cell.feiertag-highlight {
-    background-color: rgba(175, 82, 222, 0.15);
-    color: #af52de;
-    font-weight: 600;
+    background-color: rgba(168, 85, 247, 0.25);
+    color: #c084fc;
+    border: 1px solid rgba(168, 85, 247, 0.4);
 }
 
 .day-cell.today-highlight {
-    box-shadow: inset 0 0 0 1.5px #0071e3;
+    border: 2px solid #eab308;
 }
 
-/* Mittlere Spalte: Info-Box & Karten */
+/* INFO-BANNER & MAP CONTAINER */
+.info-banner {
+    background-color: #2d2d2d;
+    border-left: 4px solid #3b82f6;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    min-height: 54px;
+}
+
 #info-box {
-    background-color: #f5f5f7;
-    border-radius: 10px;
-    padding: 10px 14px;
-    font-size: 12.5px;
-    font-weight: 500;
-    color: #1d1d1f;
-    margin-bottom: 12px;
-    border-left: 4px solid #0071e3;
+    font-size: 0.95rem;
+    color: #e0e0e0;
     line-height: 1.4;
 }
 
-.maps-horizontal-container {
-    display: flex;
-    flex: 1;
-    gap: 12px;
-    overflow: hidden;
+.split-maps-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
 }
 
-.map-wrapper-outer {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #fafafa;
-    border-radius: 12px;
-    border: 1px solid rgba(0,0,0,0.03);
-    padding: 10px;
-    position: relative;
+.map-box {
+    background-color: #2d2d2d;
+    border: 1px solid #3d3d3d;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
 }
 
-.map-container {
-    position: relative;
+.map-box h3 {
+    font-size: 1.1rem;
+    color: #fff;
+    margin-bottom: 15px;
+    font-weight: 500;
+}
+
+.map-graphic-wrapper {
+    position: relative; 
+    display: inline-block;
     width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    max-width: 420px;
+    margin: 0 auto;
 }
 
-.map-container img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
+.germany-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: invert(0.9) brightness(0.6) sepia(0.1);
     opacity: 0.85;
 }
 
-/* Pins & Overlays */
-.pin-overlay {
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    pointer-events: none;
-}
-
+/* PINS (COMMON STYLES) */
 .ferien-pin, .park-pin {
     position: absolute;
-    width: 10px; height: 100px; /* unsichtbare Höhe f. Hoverfläche */
-    pointer-events: auto;
-    cursor: pointer;
-}
-
-/* Linke Karte: Schul-Kreise */
-.ferien-pin::before {
-    content: '';
-    position: absolute;
-    width: 12px; height: 12px;
-    background-color: #ff3b30;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
-    border: 2px solid #ffffff;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    top: 0; left: -6px;
-    transition: all 0.2s ease;
-}
-
-.ferien-pin.leuchtet-gruen::before {
-    background-color: #34c759;
-}
-
-/* Rechte Karte: Park-Rauten */
-.park-pin::before {
-    content: '';
-    position: absolute;
-    width: 10px; height: 10px;
-    background-color: #ff9500;
-    transform: rotate(45deg);
-    border: 2px solid #ffffff;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    top: 0; left: -5px;
-    transition: all 0.2s ease;
-}
-
-.park-pin.leuchtet-gruen::before { background-color: #34c759; }
-.park-pin.leuchtet-gelb::before { background-color: #ffcc00; }
-.park-pin.leuchtet-rot::before { background-color: #ff3b30; }
-
-/* Map Hovers */
-.ferien-pin:hover::before, .park-pin:hover::before {
-    transform: scale(1.4) !important;
-    z-index: 999;
-}
-.park-pin:hover::before {
-    transform: rotate(45deg) scale(1.4) !important;
-}
-
-/* NEU: Pulsierender Effekt für das aktive Bundesland */
-@keyframes pinPulse {
-    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 113, 227, 0.5); }
-    70% { transform: scale(1.3); box-shadow: 0 0 0 10px rgba(0, 113, 227, 0); }
-    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 113, 227, 0); }
-}
-
-.selected-state-pin::before {
-    animation: pinPulse 2s infinite ease-in-out;
-    border: 2px solid #0071e3 !important;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(0,0,0,0.8);
+    transition: transform 0.2s, background-color 0.2s;
     z-index: 10;
 }
 
-/* Rechte Spalte: Grid-Listen-Container */
-.list-container {
-    flex: 1;
-    display: flex;
-    overflow: hidden;
-    padding: 16px;
+.ferien-pin:hover, .park-pin:hover {
+    transform: translate(-50%, -50%) scale(1.5);
+    z-index: 99;
 }
 
-.split-grid {
-    display: flex;
-    gap: 16px;
-    width: 100%;
+/* STATE/FERIEN MAP PINS */
+.ferien-pin {
+    background-color: #ef4444; 
+    border: 2px solid #ffffff;
 }
 
-.grid-column {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+.ferien-pin.leuchtet-gruen {
+    background-color: #22c55e; 
 }
 
-.grid-column h2 {
-    margin: 0 0 12px 0;
-    font-size: 14px;
-    font-weight: 600;
-    color: #86868b;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+/* PARK PROGNOSEN PINS */
+.park-pin {
+    border: 1.5px solid #ffffff;
+    border-radius: 3px; 
 }
 
-#parks-liste, #laender-liste {
-    flex: 1;
+.park-pin.leuchtet-gruen { background-color: #22c55e; }
+.park-pin.leuchtet-gelb { background-color: #eab308; }
+.park-pin.leuchtet-rot { background-color: #ef4444; }
+
+/* LIST VIEW SCROLL CONTAINERS */
+.panel-box {
+    background-color: #2d2d2d;
+    border: 1px solid #3d3d3d;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.panel-box h3 {
+    font-size: 1.1rem;
+    color: #fff;
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+
+.scroll-container {
+    max-height: 38vh;
     overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    padding-right: 4px;
+    padding-right: 5px;
 }
 
-/* Listen-Elemente & NEUER Apple-Hover-Effekt */
+.scroll-container::-webkit-scrollbar {
+    width: 6px;
+}
+.scroll-container::-webkit-scrollbar-thumb {
+    background-color: #444;
+    border-radius: 4px;
+}
+
+/* LIST ITEMS (Kräftige Farben komplett wiederhergestellt!) */
 .park-item, .land-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 12px;
-    background: #ffffff;
-    border-radius: 10px;
-    border: 1px solid #f2f2f7;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 10px;
+    background-color: #22c55e; /* Sattes Grün */
+    color: #ffffff;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.15s;
 }
 
 .park-item:hover, .land-item:hover {
-    transform: translateX(4px);
-    background-color: #fafafa;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-    border-color: #d2d2d7;
+    transform: translateX(3px);
 }
 
-/* Link-Optik anpassen für klickbare Bundesländer */
-.land-item {
-    cursor: pointer;
+.park-item.maessig {
+    background-color: #eab308; /* Sattes Gelb */
+    color: #1a1a1a;
 }
 
+.park-item.ferien, .land-item.ferien {
+    background-color: #ef4444; /* Sattes Rot */
+    color: #ffffff;
+}
+
+/* ITEM TYPOGRAPHY */
 .park-info {
     display: flex;
     flex-direction: column;
-    text-align: left;
-    overflow: hidden;
-    padding-right: 4px;
 }
 
 .park-name {
-    font-size: 11px;
     font-weight: 600;
-    color: #1d1d1f;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .park-ort {
-    font-size: 8.5px;
-    color: #86868b;
-    margin-top: 1px;
+    font-size: 0.75rem;
+    opacity: 0.9;
 }
 
-/* NEU: Kapsel-Badges für optimalen Kontrast */
 .park-status-badge, .status-badge {
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 9px;
-    font-weight: 700;
-    flex-shrink: 0;
-    text-align: center;
-    width: 58px;
-    box-sizing: border-box;
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    background-color: rgba(0, 0, 0, 0.25);
+    border-radius: 4px;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.3px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-/* Farben für Badges (Weißer Text auf kräftiger Kapsel) */
-/* GRÜN: Leer / Schule */
-.park-status-badge.state-leer, .status-badge.state-schule {
-    background-color: #24b042;
-    color: #ffffff;
+/* RESPONSIVE HANDLING */
+@media (max-width: 1400px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    .calendar-wrapper {
+        max-height: 40vh;
+    }
+    .scroll-container {
+        max-height: 300px;
+    }
 }
 
-/* GELB / ORANGE: Mäßig */
-.park-status-badge.state-maessig {
-    background-color: #ff9500;
-    color: #ffffff;
-}
-
-/* ROT: Voll / Ferien */
-.park-item.ferien, .land-item.ferien {
-    border-color: rgba(255, 59, 48, 0.1);
-}
-.park-status-badge.state-voll, .status-badge.state-ferien {
-    background-color: #ff3b30;
-    color: #ffffff;
-}
-
-/* LILA: Feiertag */
-.status-badge.state-feiertag {
-    background-color: #af52de;
-    color: #ffffff;
-}
-
-/* Scrollbalken-Styling */
-::-webkit-scrollbar {
-    width: 5px;
-}
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-::-webkit-scrollbar-thumb {
-    background: #d2d2d7;
-    border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background: #86868b;
+@media (max-width: 800px) {
+    .split-maps-container {
+        grid-template-columns: 1fr;
+    }
 }
