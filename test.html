@@ -90,11 +90,17 @@
         .button:hover {
             background-color: #2980b9;
         }
+
+        /* Ladestatus-Animation */
+        .loading .prozent {
+            font-size: 1.5rem;
+            color: #95a5a6;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="container" id="app-box">
     <h1>Europa-Park</h1>
     <div class="ort">Rust, Deutschland</div>
 
@@ -118,60 +124,65 @@
         wertAnzeige.innerText = "⏳";
         statusAnzeige.innerText = "Verbindung wird aufgebaut...";
         
-        // Wir nutzen den AllOrigins Proxy-Bypass
-        const url = 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://queue-times.com/parks/51/queue_times.json');
+        // Wir nutzen den direkten JSON-Proxy von AllOrigins ohne blockierende Header
+        const targetUrl = 'https://api.wartezeiten.app/v1/parks';
         
         try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('API antwortet nicht');
+            const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
+            if (!response.ok) throw new Error('Proxy antwortet nicht');
             
-            const rawData = await response.json();
-            const data = JSON.parse(rawData.contents);
+            const dataWrapper = await response.json();
+            if (!dataWrapper.contents) throw new Error('Kein Inhalt empfangen');
             
-            let prozentwert = null;
-
-            // Wir greifen direkt das globale crowd_level ab, ohne Schleifen!
-            if (data && data.crowd_level !== undefined && data.crowd_level !== null) {
-                prozentwert = Math.round(parseFloat(data.crowd_level));
+            const parks = JSON.parse(dataWrapper.contents);
+            
+            // Suche den Europa-Park über die exakte API-ID 'europapark'
+            const europaPark = parks.find(p => p && p.id === 'europapark');
+            
+            if (europaPark) {
+                // Auslesen des Feldes (wir prüfen beide API-Schreibweisen ab)
+                const levelRaw = europaPark.crowd_level !== undefined ? europaPark.crowd_level : europaPark.crowdlevel;
+                
+                if (levelRaw !== undefined && levelRaw !== null) {
+                    const prozentwert = Math.round(parseFloat(levelRaw));
+                    
+                    // Werte auf dem Bildschirm anzeigen
+                    wertAnzeige.innerHTML = `${prozentwert}<span style="font-size: 1.5rem;">%</span>`;
+                    
+                    // Farben und Zustandstexte dynamisch anpassen
+                    if (prozentwert >= 65) {
+                        statusAnzeige.innerText = "Sehr voll (Lange Wartezeiten)";
+                        statusAnzeige.style.color = "var(--state-voll)";
+                        kreis.style.borderColor = "var(--state-voll)";
+                    } else if (prozentwert >= 35) {
+                        statusAnzeige.innerText = "Mäßig besucht (Normalbetrieb)";
+                        statusAnzeige.style.color = "var(--state-maessig)";
+                        kreis.style.borderColor = "var(--state-maessig)";
+                    } else {
+                        statusAnzeige.innerText = "Sehr leer (Freie Fahrt!)";
+                        statusAnzeige.style.color = "var(--state-leer)";
+                        kreis.style.borderColor = "var(--state-leer)";
+                    }
+                    
+                    // Zeitstempel setzen
+                    const jetzt = new Date();
+                    zeitAnzeige.innerText = `Zuletzt aktualisiert: ${jetzt.toLocaleTimeString('de-DE')} Uhr`;
+                    return;
+                }
             }
-
-            // Sicherheits-Fallback, falls der Wert exakt 0 oder null ist
-            if (prozentwert === null || prozentwert === 0) {
-                throw new Error('Kein Crowd Level vorhanden');
-            }
-
-            if (prozentwert > 100) prozentwert = 100;
-
-            // UI rendern
-            wertAnzeige.innerHTML = `${prozentwert}<span style="font-size: 1.5rem;">%</span>`;
-            
-            if (prozentwert >= 60) {
-                statusAnzeige.innerText = "Sehr voll (Lange Wartezeiten)";
-                statusAnzeige.style.color = "var(--state-voll)";
-                kreis.style.borderColor = "var(--state-voll)";
-            } else if (prozentwert >= 30) {
-                statusAnzeige.innerText = "Mäßig besucht (Normalbetrieb)";
-                statusAnzeige.style.color = "var(--state-maessig)";
-                kreis.style.borderColor = "var(--state-maessig)";
-            } else {
-                statusAnzeige.innerText = "Sehr leer (Freie Fahrt!)";
-                statusAnzeige.style.color = "var(--state-leer)";
-                kreis.style.borderColor = "var(--state-leer)";
-            }
-            
-            const jetzt = new Date();
-            zeitAnzeige.innerText = `Zuletzt aktualisiert: ${jetzt.toLocaleTimeString('de-DE')} Uhr`;
+            throw new Error('Parkdaten unvollständig');
             
         } catch (fehler) {
             console.error(fehler);
             wertAnzeige.innerText = "❌";
-            statusAnzeige.innerText = "Live-Daten temporär nicht verfügbar.";
+            statusAnzeige.innerText = "Fehler beim Laden der Live-Daten.";
             statusAnzeige.style.color = "var(--state-voll)";
             kreis.style.borderColor = "#eee";
-            zeitAnzeige.innerText = "Der API-Server liefert aktuell unvollständige Daten.";
+            zeitAnzeige.innerText = "Bitte versuche es gleich noch einmal.";
         }
     }
 
+    // Beim ersten Laden der Seite sofort die Daten abrufen
     document.addEventListener('DOMContentLoaded', holeEuropaParkDaten);
 </script>
 
