@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Europa-Park Live-Auslastung</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-main: #2c3e50;
+            --accent-blue: #3498db;
+            --state-leer: #2ecc71;
+            --state-maessig: #f1c40f;
+            --state-voll: #e74c3c;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+            background: var(--card-bg);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .ort {
+            color: #7f8c8d;
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .auslastung-kreis {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: 8px solid #eee;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 2rem auto;
+            transition: all 0.5s ease;
+        }
+
+        .prozent {
+            font-size: 3.5rem;
+            font-weight: bold;
+        }
+
+        .status-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .update-zeit {
+            font-size: 0.8rem;
+            color: #95a5a6;
+        }
+
+        .button {
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .button:hover {
+            background-color: #2980b9;
+        }
+
+        /* Ladestatus-Animation */
+        .loading .prozent {
+            font-size: 1.5rem;
+            color: #95a5a6;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="app-box">
+    <h1>Europa-Park</h1>
+    <div class="ort">Rust, Deutschland</div>
+
+    <div class="auslastung-kreis" id="kreis">
+        <div class="prozent" id="wert">--</div>
+    </div>
+
+    <div class="status-text" id="status">Lade Live-Daten...</div>
+    
+    <button class="button" onclick="holeEuropaParkDaten()">Jetzt aktualisieren</button>
+    <div class="update-zeit" id="zeit" style="margin-top: 1rem;"></div>
+</div>
+
+<script>
+    async function holeEuropaParkDaten() {
+        const wertAnzeige = document.getElementById('wert');
+        const statusAnzeige = document.getElementById('status');
+        const kreis = document.getElementById('kreis');
+        const zeitAnzeige = document.getElementById('zeit');
+        
+        wertAnzeige.innerText = "⏳";
+        statusAnzeige.innerText = "Verbindung wird aufgebaut...";
+        
+        // Wir nutzen den direkten JSON-Proxy von AllOrigins ohne blockierende Header
+        const targetUrl = 'https://api.wartezeiten.app/v1/parks';
+        
+        try {
+            const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
+            if (!response.ok) throw new Error('Proxy antwortet nicht');
+            
+            const dataWrapper = await response.json();
+            if (!dataWrapper.contents) throw new Error('Kein Inhalt empfangen');
+            
+            const parks = JSON.parse(dataWrapper.contents);
+            
+            // Suche den Europa-Park über die exakte API-ID 'europapark'
+            const europaPark = parks.find(p => p && p.id === 'europapark');
+            
+            if (europaPark) {
+                // Auslesen des Feldes (wir prüfen beide API-Schreibweisen ab)
+                const levelRaw = europaPark.crowd_level !== undefined ? europaPark.crowd_level : europaPark.crowdlevel;
+                
+                if (levelRaw !== undefined && levelRaw !== null) {
+                    const prozentwert = Math.round(parseFloat(levelRaw));
+                    
+                    // Werte auf dem Bildschirm anzeigen
+                    wertAnzeige.innerHTML = `${prozentwert}<span style="font-size: 1.5rem;">%</span>`;
+                    
+                    // Farben und Zustandstexte dynamisch anpassen
+                    if (prozentwert >= 65) {
+                        statusAnzeige.innerText = "Sehr voll (Lange Wartezeiten)";
+                        statusAnzeige.style.color = "var(--state-voll)";
+                        kreis.style.borderColor = "var(--state-voll)";
+                    } else if (prozentwert >= 35) {
+                        statusAnzeige.innerText = "Mäßig besucht (Normalbetrieb)";
+                        statusAnzeige.style.color = "var(--state-maessig)";
+                        kreis.style.borderColor = "var(--state-maessig)";
+                    } else {
+                        statusAnzeige.innerText = "Sehr leer (Freie Fahrt!)";
+                        statusAnzeige.style.color = "var(--state-leer)";
+                        kreis.style.borderColor = "var(--state-leer)";
+                    }
+                    
+                    // Zeitstempel setzen
+                    const jetzt = new Date();
+                    zeitAnzeige.innerText = `Zuletzt aktualisiert: ${jetzt.toLocaleTimeString('de-DE')} Uhr`;
+                    return;
+                }
+            }
+            throw new Error('Parkdaten unvollständig');
+            
+        } catch (fehler) {
+            console.error(fehler);
+            wertAnzeige.innerText = "❌";
+            statusAnzeige.innerText = "Fehler beim Laden der Live-Daten.";
+            statusAnzeige.style.color = "var(--state-voll)";
+            kreis.style.borderColor = "#eee";
+            zeitAnzeige.innerText = "Bitte versuche es gleich noch einmal.";
+        }
+    }
+
+    // Beim ersten Laden der Seite sofort die Daten abrufen
+    document.addEventListener('DOMContentLoaded', holeEuropaParkDaten);
+</script>
+
+</body>
+</html>
