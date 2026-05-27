@@ -3,7 +3,7 @@ let aktuellesDatum = new Date(2026, 4, 27); // Fixiert auf den 27. Mai 2026
 let ausgewaehltesBundesland = "Mecklenburg-Vorpommern";
 let ganzeWochePruefen = false;
 let apiLiveDaten = null; 
-let apiFehler = false;
+let apiGeladen = false;
 
 const MONATS_NAMEN = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 const WOCHEN_TAGE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
@@ -76,29 +76,46 @@ function formatiereSpanne(datum) {
     return `${t}.${m}.`;
 }
 
-// Global definierte Callback-Funktion für den JSONP-Bypass
-window.verarbeiteLiveDaten = function(daten) {
-    if (daten) {
-        apiLiveDaten = daten;
-        apiFehler = false;
-        console.log("Live-Daten nativ via JSONP geladen:", apiLiveDaten);
-        updateDashboard();
-    }
-};
-
-// FIX: Lädt die Daten direkt über ein dynamisches Script-Tag (JSONP-Verfahren)
-function ladeLiveCrowdDaten() {
-    const script = document.createElement('script');
-    // Die API unterstützt die Übergabe eines Callbacks nativ im URL-Parameter
-    script.src = 'https://api.wartezeiten.app/v1/crowdlevel?callback=verarbeiteLiveDaten';
+// FIX: Holt die Live-Daten über einen stabilen CORS-Proxy-Verbund im Hintergrund
+async function ladeLiveCrowdDaten() {
+    const targetUrl = 'https://api.wartezeiten.app/v1/crowdlevel';
     
-    script.onerror = function() {
-        console.error("JSONP-Abruf fehlgeschlagen. Lokaler Prognosemodus aktiv.");
-        apiFehler = true;
-        updateDashboard();
-    };
+    // Setze ein Sicherheitsnetz: Nach 4 Sekunden bricht das Laden ab und erzwingt das Dashboard
+    setTimeout(() => {
+        if (!apiGeladen) {
+            console.log("API-Verbindung verlangsamt. Zeige Prognose-Modus.");
+            updateDashboard();
+        }
+    }, 4000);
 
-    document.body.appendChild(script);
+    try {
+        // Wir nutzen den stabilen cors-anywhere Mirror, der Anfragen von github.io akzeptiert
+        const response = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl));
+        if (response.ok) {
+            const dataWrapper = await response.json();
+            if (dataWrapper.contents) {
+                apiLiveDaten = JSON.parse(dataWrapper.contents);
+                apiGeladen = true;
+                console.log("Live-Daten über HTTPS-Bypass geladen!");
+                updateDashboard();
+                return;
+            }
+        }
+    } catch (fehler) {
+        console.log("Primärer Proxy blockiert. Versuche Ausweich-Server...");
+    }
+
+    // Ausweich-Weg über einen zweiten freien API-Kanal
+    try {
+        const resFallback = await fetch('https://corsproxy.io/?' + encodeURIComponent(targetUrl));
+        if (resFallback.ok) {
+            apiLiveDaten = await resFallback.json();
+            apiGeladen = true;
+            updateDashboard();
+        }
+    } catch (e) {
+        console.error("API temporär offline. Lokale Prognosen aktiv.");
+    }
 }
 
 function holeLiveProzentwert(parkApiId) {
@@ -146,8 +163,8 @@ window.addEventListener('DOMContentLoaded', () => {
     baueKalender();
     initMapHover(); 
     
-    updateDashboard();
-    ladeLiveCrowdDaten();
+    updateDashboard(); // Lädt sofort die statische Übersicht
+    ladeLiveCrowdDaten(); // Holt asynchron die API-Daten nach
 
     document.getElementById('state-select').addEventListener('change', (e) => {
         ausgewaehltesBundesland = e.target.value;
@@ -265,12 +282,10 @@ function initMapHover() {
 
 function pruefeInfoboxText() {
     if (aktuellesDatum.getDate() === 27 && aktuellesDatum.getMonth() === 4) {
-        if (apiLiveDaten) {
+        if (apiGeladen) {
             document.getElementById('info-box').textContent = `⚡ Live-Modus aktiv: Unterstützte Parks zeigen die prozentuale Echtzeit-Auslastung der API.`;
-        } else if (apiFehler) {
-            document.getElementById('info-box').textContent = `⚠️ API-Server offline. Dashboard läuft stabil im lokalen Ferien-Prognosemodus.`;
         } else {
-            document.getElementById('info-box').textContent = `⚡ Live-Modus aktiv: Synchronisiere Echtzeitdaten über JSONP...`;
+            document.getElementById('info-box').textContent = `🔮 Prognose-Modus aktiv. (Kalender-Berechnung)`;
         }
         return;
     }
