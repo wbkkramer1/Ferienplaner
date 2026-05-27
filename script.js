@@ -1,8 +1,9 @@
 // Globale Zustände
-let aktuellesDatum = new Date(2026, 4, 27); // 27. Mai 2026
+let aktuellesDatum = new Date(2026, 4, 27); // Fixiert auf den 27. Mai 2026
 let ausgewaehltesBundesland = "Mecklenburg-Vorpommern";
 let ganzeWochePruefen = false;
 let apiLiveDaten = null; 
+let apiFehler = false; // Flag für optisches Feedback bei Serverproblemen
 
 const MONATS_NAMEN = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 const WOCHEN_TAGE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
@@ -75,27 +76,46 @@ function formatiereSpanne(datum) {
     return `${t}.${m}.`;
 }
 
+// FIX: Robuster Daten-Tunnel mit integriertem Fallback-System
 async function ladeLiveCrowdDaten() {
+    const targetUrl = 'https://api.wartezeiten.app/v1/crowdlevel';
+    
+    // Versuch 1: AllOrigins Proxy (Schneller JSON-Abruf)
     try {
-        const response = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://api.wartezeiten.app/v1/crowdlevel'));
-        if (response.ok) {
-            const dataWrapper = await response.json();
-            if (dataWrapper.contents) {
-                apiLiveDaten = JSON.parse(dataWrapper.contents);
-                console.log("Live-Daten geladen:", apiLiveDaten);
+        const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
+        if (res.ok) {
+            const wrapper = await res.json();
+            if (wrapper.contents) {
+                apiLiveDaten = JSON.parse(wrapper.contents);
+                apiFehler = false;
                 updateDashboard();
+                return;
             }
         }
-    } catch (fehler) {
-        console.error("API-Abruf fehlgeschlagen.", fehler);
+    } catch (e) {
+        console.log("AllOrigins läuft ins Leere, schalte auf Fallback-Proxy um...");
+    }
+
+    // Versuch 2: Ausweich-Proxy (Bypass über ThingProxy)
+    try {
+        const resFallback = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`);
+        if (resFallback.ok) {
+            apiLiveDaten = await resFallback.json();
+            apiFehler = false;
+            updateDashboard();
+            return;
+        }
+    } catch (e) {
+        console.error("Sämtliche API-Tunnel blockiert. Nutze lokalen Prognose-Modus.");
+        apiFehler = true;
+        updateDashboard();
     }
 }
 
-// FIX: Erzwingt den Live-Abgleich für den ausgewählten 27. Mai im Kalender
 function holeLiveProzentwert(parkApiId) {
     if (!apiLiveDaten || !parkApiId) return null;
     
-    // Wir prüfen rein auf Tag und Monat (27. Mai), um Jahr-Konflikte der PC-Uhr auszuschließen
+    // Prüft tagesgenau auf den 27. Mai
     if (aktuellesDatum.getDate() === 27 && aktuellesDatum.getMonth() === 4) {
         const livePark = apiLiveDaten.find(p => p.id === parkApiId);
         if (livePark && livePark.crowdlevel !== undefined && livePark.crowdlevel !== null) {
@@ -151,7 +171,6 @@ window.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-/* Die restlichen Funktionen bleiben exakt identisch */
 function initDropdown() {
     const select = document.getElementById('state-select');
     if (!select) return;
@@ -259,8 +278,10 @@ function pruefeInfoboxText() {
     if (aktuellesDatum.getDate() === 27 && aktuellesDatum.getMonth() === 4) {
         if (apiLiveDaten) {
             document.getElementById('info-box').textContent = `⚡ Live-Modus aktiv: Unterstützte Parks zeigen die prozentuale Echtzeit-Auslastung der API.`;
+        } else if (apiFehler) {
+            document.getElementById('info-box').textContent = `⚠️ API-Server nicht erreichbar. Dashboard läuft stabil im Ferien-Prognosemodus.`;
         } else {
-            document.getElementById('info-box').textContent = `🔮 Prognose-Modus: Verbinde über GitHub-Bypass mit Wartezeiten-Server...`;
+            document.getElementById('info-box').textContent = `🔮 Verbindungs-Bypass: Synchronisiere mit Wartezeiten-Server...`;
         }
         return;
     }
@@ -298,7 +319,6 @@ function updateDashboard() {
     }
     const heuteStr = formatiereDatumKurz(new Date());
     
-    // Raster-Aktualisierung
     document.querySelectorAll('.day-cell:not(.empty)').forEach(zelle => {
         const parts = zelle.dataset.dateString.split('-');
         const d = new Date(parts[0], parts[1] - 1, parts[2]);
