@@ -1,3 +1,4 @@
+// Globale Zustände
 let aktuellesDatum = new Date(2026, 4, 27); 
 let ausgewaehltesBundesland = "Mecklenburg-Vorpommern";
 let ganzeWochePruefen = false;
@@ -194,6 +195,13 @@ function initMapHover() {
         pin.addEventListener('mouseleave', () => {
             pruefeInfoboxText();
         });
+        
+        // Klick auf Map-Pin ändert das Bundesland im Dropdown
+        pin.addEventListener('click', () => {
+            ausgewaehltesBundesland = blName;
+            document.getElementById('state-select').value = blName;
+            updateDashboard();
+        });
     });
 
     document.querySelectorAll('.park-pin').forEach(pin => {
@@ -304,10 +312,8 @@ function updateDashboard() {
         let ferienNameZusatz = "";
 
         if (zeitraum) {
-            // FIX: Wenn ein Ferienname im Zeitraum-Objekt fehlt, benennen wir es anhand der Namen aus daten.js
             let name = zeitraum.name;
             if (!name) {
-                // Automatischer Fallback, falls in daten.js der Name-String fehlt
                 const mStart = zeitraum.start.getMonth();
                 if (mStart === 0 || mStart === 1) name = "Winter";
                 else if (mStart === 2 || mStart === 3) name = "Ostern";
@@ -323,20 +329,42 @@ function updateDashboard() {
 
         const item = document.createElement('div');
         item.className = `land-item ${hatFerienInSpanne || hatFeiertagHeute ? 'ferien' : ''}`;
+        
+        // Klick-Event für die rechte Liste: Ändert das Bundesland im Dashboard
+        item.addEventListener('click', () => {
+            ausgewaehltesBundesland = bl;
+            document.getElementById('state-select').value = bl;
+            updateDashboard();
+        });
+
+        let badgeClass = "state-schule";
+        let badgeText = "Schule";
+        if (hatFeiertagHeute) {
+            badgeClass = "state-feiertag";
+            badgeText = "Feiertag";
+        } else if (hatFerienInSpanne) {
+            badgeClass = "state-ferien";
+            badgeText = "Ferien";
+        }
 
         item.innerHTML = `
             <div class="park-info">
                 <span class="park-name">${bl}${ferienNameZusatz}</span>
                 ${datumsText}
             </div>
-            <span class="status-badge">${hatFeiertagHeute ? 'Feiertag' : (hatFerienInSpanne ? 'Ferien' : 'Schule')}</span>
+            <span class="status-badge ${badgeClass}">${badgeText}</span>
         `;
         laenderListe.appendChild(item);
 
         document.querySelectorAll('.ferien-pin').forEach(pin => {
             if (pin.getAttribute('data-land') === bl) {
                 pin.className = "ferien-pin";
-                if (!hatFerienInSpanne && !hatFeiertagHeute) pin.classList.add('leuchtet-gruen');    
+                if (!hatFerienInSpanne && !hatFeiertagHeute) pin.classList.add('leuchtet-gruen');
+                
+                // Optisches Highlight setzen, wenn das Land im Dropdown aktiv ist
+                if (bl === ausgewaehltesBundesland) {
+                    pin.classList.add('selected-state-pin');
+                }
             }
         });
     });
