@@ -76,7 +76,7 @@ function formatiereSpanne(datum) {
     return `${t}.${m}.`;
 }
 
-// Lädt die Daten verschlüsselt über AllOrigins, um CORS-Sperren auf GitHub Pages zu umgehen
+// Lädt die Daten über AllOrigins, um CORS-Sperren auf GitHub Pages zu umgehen
 async function ladeLiveCrowdDaten() {
     const targetUrl = 'https://api.wartezeiten.app/v1/parks';
     
