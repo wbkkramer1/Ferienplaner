@@ -118,7 +118,7 @@
         wertAnzeige.innerText = "⏳";
         statusAnzeige.innerText = "Verbindung wird aufgebaut...";
         
-        // Wir nutzen den unblockierbaren Open-Source-Spiegel der originalen Betreiberdaten
+        // Wir nutzen den AllOrigins Proxy-Bypass
         const url = 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://queue-times.com/parks/51/queue_times.json');
         
         try {
@@ -128,44 +128,21 @@
             const rawData = await response.json();
             const data = JSON.parse(rawData.contents);
             
-            let alleAttraktionen = [];
-
-            if (data && data.lands && Array.isArray(data.lands)) {
-                data.lands.forEach(land => {
-                    if (land.rides && Array.isArray(land.rides)) {
-                        alleAttraktionen = alleAttraktionen.concat(land.rides);
-                    }
-                });
-            } else if (data && data.rides && Array.isArray(data.rides)) {
-                alleAttraktionen = data.rides;
-            }
-
             let prozentwert = null;
 
-            if (alleAttraktionen.length > 0) {
-                const geoeffneteAttraktionen = alleAttraktionen.filter(r => r.is_open === true);
-                
-                if (geoeffneteAttraktionen.length > 0) {
-                    const gesamtWartezeit = geoeffneteAttraktionen.reduce((sum, r) => sum + r.wait_time, 0);
-                    const durchschnitt = gesamtWartezeit / geoeffneteAttraktionen.length;
-                    
-                    // 40 Minuten durchschnittliche Wartezeit entspricht vollem Andrang (100%)
-                    prozentwert = Math.round((durchschnitt / 40) * 100);
-                }
-            }
-
-            if ((prozentwert === null || prozentwert === 0) && data && data.crowd_level !== undefined) {
+            // Wir greifen direkt das globale crowd_level ab, ohne Schleifen!
+            if (data && data.crowd_level !== undefined && data.crowd_level !== null) {
                 prozentwert = Math.round(parseFloat(data.crowd_level));
             }
 
-            // Wenn der Park leer ist oder Werte minimal sind, setzen wir ein realistisches Basisrauschen
+            // Sicherheits-Fallback, falls der Wert exakt 0 oder null ist
             if (prozentwert === null || prozentwert === 0) {
-                prozentwert = 20; 
+                throw new Error('Kein Crowd Level vorhanden');
             }
 
             if (prozentwert > 100) prozentwert = 100;
 
-            // UI erfolgreich rendern
+            // UI rendern
             wertAnzeige.innerHTML = `${prozentwert}<span style="font-size: 1.5rem;">%</span>`;
             
             if (prozentwert >= 60) {
@@ -188,10 +165,10 @@
         } catch (fehler) {
             console.error(fehler);
             wertAnzeige.innerText = "❌";
-            statusAnzeige.innerText = "Verbindung fehlgeschlagen.";
+            statusAnzeige.innerText = "Live-Daten temporär nicht verfügbar.";
             statusAnzeige.style.color = "var(--state-voll)";
             kreis.style.borderColor = "#eee";
-            zeitAnzeige.innerText = "Bitte lade die Seite in ein paar Minuten neu.";
+            zeitAnzeige.innerText = "Der API-Server liefert aktuell unvollständige Daten.";
         }
     }
 
