@@ -301,8 +301,24 @@ function updateDashboard() {
 
         const zeitraum = holeAktuellenFerienZeitraum(bl, aktuellesDatum);
         let datumsText = "";
+        let ferienNameZusatz = "";
+
         if (zeitraum) {
+            // FIX: Wenn ein Ferienname im Zeitraum-Objekt fehlt, benennen wir es anhand der Namen aus daten.js
+            let name = zeitraum.name;
+            if (!name) {
+                // Automatischer Fallback, falls in daten.js der Name-String fehlt
+                const mStart = zeitraum.start.getMonth();
+                if (mStart === 0 || mStart === 1) name = "Winter";
+                else if (mStart === 2 || mStart === 3) name = "Ostern";
+                else if (mStart === 4 || mStart === 5) name = "Pfingsten";
+                else if (mStart === 6 || mStart === 7) name = "Sommer";
+                else if (mStart === 9 || mStart === 10) name = "Herbst";
+                else name = "Weihnachten";
+            }
+            
             datumsText = `<span class="park-ort" style="display:block; margin-top:2px;">${formatiereSpanne(zeitraum.start)} – ${formatiereSpanne(zeitraum.ende)}</span>`;
+            ferienNameZusatz = ` (${name})`;
         }
 
         const item = document.createElement('div');
@@ -310,7 +326,7 @@ function updateDashboard() {
 
         item.innerHTML = `
             <div class="park-info">
-                <span class="park-name">${bl}</span>
+                <span class="park-name">${bl}${ferienNameZusatz}</span>
                 ${datumsText}
             </div>
             <span class="status-badge">${hatFeiertagHeute ? 'Feiertag' : (hatFerienInSpanne ? 'Ferien' : 'Schule')}</span>
