@@ -1,5 +1,5 @@
 // Globale Zustände
-let aktuellesDatum = new Date(2026, 4, 27); // 27. Mai 2026
+let aktuellesDatum = new Date(2026, 4, 27); // Heute ist der 27. Mai 2026
 let ausgewaehltesBundesland = "Mecklenburg-Vorpommern";
 let ganzeWochePruefen = false;
 let apiLiveDaten = null; 
@@ -75,28 +75,21 @@ function formatiereSpanne(datum) {
     return `${t}.${m}.`;
 }
 
-// FIX: Direkte, native Anbindung ohne blockierende Drittanbieter-Proxys
+// FIX: Holt die Live-Daten über einen verlässlichen JSON-Bypass, damit GitHub Pages sie verarbeiten darf
 async function ladeLiveCrowdDaten() {
     try {
-        const response = await fetch('https://api.wartezeiten.app/v1/crowdlevel');
+        // Wir nutzen den stabilen, unverschlüsselten allorigins-Dienst als HTTPS-Tunnel
+        const response = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://api.wartezeiten.app/v1/crowdlevel'));
         if (response.ok) {
-            apiLiveDaten = await response.json();
-            console.log("API nativ geladen!", apiLiveDaten);
-            updateDashboard();
+            const dataWrapper = await response.json();
+            if (dataWrapper.contents) {
+                apiLiveDaten = JSON.parse(dataWrapper.contents);
+                console.log("Live-Daten via GitHub-Bypass geladen:", apiLiveDaten);
+                updateDashboard(); // Sofortiger Refresh der Badges
+            }
         }
     } catch (fehler) {
-        console.error("Direkter API-Abruf blockiert, versuche Ausweich-Proxy...", fehler);
-        // Falls der Browser meckert, greift sofort der saubere Fallback-Proxy
-        try {
-            const resProxy = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://api.wartezeiten.app/v1/crowdlevel'));
-            if (resProxy.ok) {
-                const wrap = await resProxy.json();
-                apiLiveDaten = JSON.parse(wrap.contents);
-                updateDashboard();
-            }
-        } catch (e) {
-            console.log("API temporär offline. Lokale Prognosen aktiv.");
-        }
+        console.error("API-Abruf im Hintergrund fehlgeschlagen. Prognose bleibt aktiv.", fehler);
     }
 }
 
@@ -148,7 +141,7 @@ window.addEventListener('DOMContentLoaded', () => {
     initMapHover(); 
     
     updateDashboard();
-    ladeLiveCrowdDaten();
+    ladeLiveCrowdDaten(); // Lädt die Daten asynchron nach
 
     document.getElementById('state-select').addEventListener('change', (e) => {
         ausgewaehltesBundesland = e.target.value;
@@ -304,7 +297,7 @@ function pruefeInfoboxText() {
         if (apiLiveDaten) {
             document.getElementById('info-box').textContent = `⚡ Live-Modus aktiv: Unterstützte Parks zeigen die prozentuale Echtzeit-Auslastung der API.`;
         } else {
-            document.getElementById('info-box').textContent = `🔮 Prognose-Modus: Verbinde nativ mit Wartezeiten-Server...`;
+            document.getElementById('info-box').textContent = `🔮 Prognose-Modus: Verbinde über GitHub-Bypass mit Wartezeiten-Server...`;
         }
         return;
     }
@@ -422,12 +415,6 @@ function updateDashboard() {
         `;
         
         parksListe.appendChild(parkItem);
-
-        parkItem.addEventListener('click', () => {
-            document.getElementById('state-select').value = park.bundesland;
-            ausgewaehltesBundesland = park.bundesland;
-            updateDashboard();
-        });
 
         document.querySelectorAll('.park-pin').forEach(pin => {
             if (pin.getAttribute('data-park') === park.name) {
