@@ -51,6 +51,7 @@ function holeAktuellenFerienZeitraum(bundesland, datum) {
     }) || null;
 }
 
+// Berichtigt das Feiertags-Matching im lokalen Datenstamm
 function holeFeiertagsNameFuerLand(datum, bundesland) {
     const schluessel = zuLokalemIsoString(datum);
     const feiertag = FEIERTAGE_2026[schluessel];
