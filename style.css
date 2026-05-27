@@ -145,7 +145,7 @@ input:checked + .slider:before {
 
 /* JAHRESKALENDER (Sidebar) */
 .calendar-wrapper {
-    max-height: 65vh;
+    max-height: 75vh;
     overflow-y: auto;
     padding-right: 5px;
 }
@@ -266,9 +266,8 @@ input:checked + .slider:before {
     font-weight: 500;
 }
 
-/* !!! WICHTIGER FIX: RELATIVE POSITIONIERUNG FÜR DIE MAP-PINS !!! */
 .map-graphic-wrapper {
-    position: relative; /* DAS HIER HÄLT DIE PINS GEFANGEN */
+    position: relative; /* Hält die Pins felsenfest auf der Karte gefangen */
     display: inline-block;
     width: 100%;
     max-width: 420px;
@@ -303,18 +302,18 @@ input:checked + .slider:before {
 
 /* STATE/FERIEN MAP PINS (Linke Karte) */
 .ferien-pin {
-    background-color: #ef4444; /* Standard: Rot leuchtend (Ferien) */
+    background-color: #ef4444; 
     border: 2px solid #ffffff;
 }
 
 .ferien-pin.leuchtet-gruen {
-    background-color: #22c55e; /* Grün leuchtend (Schulzeit) */
+    background-color: #22c55e; 
 }
 
 /* PARK PROGNOSEN PINS (Rechte Karte) */
 .park-pin {
     border: 1.5px solid #ffffff;
-    border-radius: 3px; /* Rauten/Quadrat-Look für Parks */
+    border-radius: 3px; 
 }
 
 .park-pin.leuchtet-gruen { background-color: #22c55e; }
@@ -356,7 +355,7 @@ input:checked + .slider:before {
     justify-content: space-between;
     align-items: center;
     padding: 10px;
-    background-color: #22c55e; /* Default: Grün / Frei / Leer */
+    background-color: #22c55e; 
     color: #ffffff;
     border-radius: 6px;
     margin-bottom: 8px;
@@ -370,14 +369,13 @@ input:checked + .slider:before {
     transform: translateX(3px);
 }
 
-/* LIST ELEMENT COLOR MODIFIERS */
 .park-item.maessig {
-    background-color: #eab308; /* Gelb / Mäßig */
+    background-color: #eab308; 
     color: #1a1a1a;
 }
 
 .park-item.ferien, .land-item.ferien {
-    background-color: #ef4444; /* Rot / Voll / Ferien */
+    background-color: #ef4444; 
     color: #ffffff;
 }
 
@@ -396,7 +394,6 @@ input:checked + .slider:before {
     opacity: 0.9;
 }
 
-/* BADGES Inside Lists */
 .park-status-badge, .status-badge {
     font-size: 0.75rem;
     padding: 4px 8px;
@@ -407,7 +404,7 @@ input:checked + .slider:before {
     letter-spacing: 0.3px;
 }
 
-/* RESPONSIVE HANDLING (For smaller screens) */
+/* RESPONSIVE HANDLING */
 @media (max-width: 1400px) {
     .dashboard-grid {
         grid-template-columns: 1fr;
