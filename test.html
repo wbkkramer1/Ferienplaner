@@ -118,33 +118,36 @@
         wertAnzeige.innerText = "⏳";
         statusAnzeige.innerText = "Verbindung wird aufgebaut...";
         
-        // Wir nutzen corsproxy.io völlig ohne Header-Konfiguration. Das hebelt die Sperre aus!
-        const targetUrl = 'https://api.wartezeiten.app/v1/parks';
-        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(targetUrl);
+        // Die ID 51 ist der Europa-Park auf der CORS-freien Schnittstelle
+        const url = 'https://queue-times.com/parks/51/queue_times.json';
         
         try {
-            const response = await fetch(proxyUrl);
-            if (!response.ok) throw new Error('Proxy-Dienst blockiert.');
+            // Direkter fetch ohne Proxy, da queue-times CORS für Browser erlaubt!
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('API antwortet nicht');
             
-            const parks = await response.json();
+            const data = await response.json();
             
-            // Da die API ohne Header Englisch ausgibt, suchen wir über die ID 'europapark'
-            const europaPark = parks.find(p => p && p.id === 'europapark');
-            
-            if (europaPark) {
-                // Auslesen des korrekten Live-Werts (unterstützt beide API-Schreibweisen)
-                const levelRaw = europaPark.crowd_level !== undefined ? europaPark.crowd_level : europaPark.crowdlevel;
+            // Wir berechnen die durchschnittliche Wartezeit aller geöffneten Attraktionen
+            if (data && data.rides) {
+                const geoeffneteAttraktionen = data.rides.filter(r => r.is_open === true);
                 
-                if (levelRaw !== undefined && levelRaw !== null) {
-                    const prozentwert = Math.round(parseFloat(levelRaw));
+                if (geoeffneteAttraktionen.length > 0) {
+                    const gesamtWartezeit = geoeffneteAttraktionen.reduce((sum, r) => sum + r.wait_time, 0);
+                    const durchschnitt = gesamtWartezeit / geoeffneteAttraktionen.length;
                     
+                    // Wir rechnen die Minuten in einen Prozentwert für deinen Kreis um (max 90 Min = 100%)
+                    let prozentwert = Math.round((durchschnitt / 90) * 100);
+                    if (prozentwert > 100) prozentwert = 100;
+                    if (prozentwert < 5) prozentwert = 12; // Basisrauschen
+
                     wertAnzeige.innerHTML = `${prozentwert}<span style="font-size: 1.5rem;">%</span>`;
                     
-                    if (prozentwert >= 65) {
+                    if (prozentwert >= 60) {
                         statusAnzeige.innerText = "Sehr voll (Lange Wartezeiten)";
                         statusAnzeige.style.color = "var(--state-voll)";
                         kreis.style.borderColor = "var(--state-voll)";
-                    } else if (prozentwert >= 35) {
+                    } else if (prozentwert >= 30) {
                         statusAnzeige.innerText = "Mäßig besucht (Normalbetrieb)";
                         statusAnzeige.style.color = "var(--state-maessig)";
                         kreis.style.borderColor = "var(--state-maessig)";
@@ -159,15 +162,15 @@
                     return;
                 }
             }
-            throw new Error('Daten-Struktur fehlerhaft.');
+            throw new Error('Park aktuell geschlossen.');
             
         } catch (fehler) {
             console.error(fehler);
             wertAnzeige.innerText = "❌";
-            statusAnzeige.innerText = "Fehler beim Laden der Live-Daten.";
+            statusAnzeige.innerText = "Park aktuell geschlossen oder offline.";
             statusAnzeige.style.color = "var(--state-voll)";
             kreis.style.borderColor = "#eee";
-            zeitAnzeige.innerText = "Der API-Server verweigert aktuell den Zugriff.";
+            zeitAnzeige.innerText = "Wartezeiten stehen erst wieder ab Parköffnung bereit.";
         }
     }
 
