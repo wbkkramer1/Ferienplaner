@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ferien-Finder Deutschland 2026</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <div class="header-blur"></div>
+        <div class="header-content">
+            <h1>Ferien-Finder <span>2026</span></h1>
+        </div>
+    </header>
+
+    <div class="dashboard-wrapper">
+        
+        <div class="sidebar-left">
+            <div class="controls-inner apple-card">
+                <h2 id="selected-date-display">27. Mai 2026</h2>
+                
+                <select id="state-select" class="state-dropdown">
+                    </select>
+
+                <label class="week-toggle">
+                    <input type="checkbox" id="week-check">
+                    <span class="custom-switch"></span>
+                    <span class="toggle-text">Ganze Woche prüfen</span>
+                </label>
+            </div>
+
+            <div id="calendar-container" class="yearly-calendar apple-card">
+                </div>
+        </div>
+
+        <div class="map-area apple-card">
+            <div id="info-box">Wählen Sie ein Datum oder ein Bundesland.</div>
+            
+            <div class="maps-horizontal-container">
+                <div class="map-wrapper-outer">
+                    <div class="map-container">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Karte_Deutsche_Bundesl%C3%A4nder_%28Bezeichner%29.svg" alt="Deutschland Karte" id="de-map">
+                        <div class="pin-overlay">
+                            <div id="pin-DE-SH" class="ferien-pin" style="top: 7%; left: 37%;" data-land="Schleswig-Holstein"></div>
+                            <div id="pin-DE-MV" class="ferien-pin" style="top: 13%; left: 68%;" data-land="Mecklenburg-Vorpommern"></div>
+                            <div id="pin-DE-HH" class="ferien-pin" style="top: 22%; left: 45%;" data-land="Hamburg"></div>
+                            <div id="pin-DE-HB" class="ferien-pin" style="top: 20.5%; left: 28%;" data-land="Bremen"></div>
+                            <div id="pin-DE-NI" class="ferien-pin" style="top: 34%; left: 40%;" data-land="Niedersachsen"></div>
+                            <div id="pin-DE-BB" class="ferien-pin" style="top: 38%; left: 86%;" data-land="Brandenburg"></div>
+                            <div id="pin-DE-BE" class="ferien-pin" style="top: 27%; left: 81.5%;" data-land="Berlin"></div>
+                            <div id="pin-DE-ST" class="ferien-pin" style="top: 34.5%; left: 61.5%;" data-land="Sachsen-Anhalt"></div>
+                            <div id="pin-DE-NW" class="ferien-pin" style="top: 41%; left: 24%;" data-land="Nordrhein-Westfalen"></div>
+                            <div id="pin-DE-HE" class="ferien-pin" style="top: 51.5%; left: 30.5%;" data-land="Hessen"></div>
+                            <div id="pin-DE-TH" class="ferien-pin" style="top: 54.5%; left: 51.5%;" data-land="Thüringen"></div>
+                            <div id="pin-DE-SN" class="ferien-pin" style="top: 52%; left: 77%;" data-land="Sachsen"></div>
+                            <div id="pin-DE-RP" class="ferien-pin" style="top: 57%; left: 10%;" data-land="Rheinland-Pfalz"></div>
+                            <div id="pin-DE-SL" class="ferien-pin" style="top: 72%; left: 8%;" data-land="Saarland"></div>
+                            <div id="pin-DE-BW" class="ferien-pin" style="top: 75%; left: 36%;" data-land="Baden-Württemberg"></div>
+                            <div id="pin-DE-BY" class="ferien-pin" style="top: 70%; left: 60%;" data-land="Bayern"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="map-wrapper-outer parks-map">
+                    <div class="map-container">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Karte_Deutsche_Bundesl%C3%A4nder_%28Bezeichner%29.svg" alt="Freizeitpark Karte">
+                        <div class="pin-overlay">
+                            <div id="parkpin-Europa-Park" class="park-pin" style="top: 75%; left: 14%;" data-park="Europa-Park"></div>
+                            <div id="parkpin-Phantasialand" class="park-pin" style="top: 46%; left: 16%;" data-park="Phantasialand"></div>
+                            <div id="parkpin-Heide-Park-Resort" class="park-pin" style="top: 29%; left: 45%;" data-park="Heide Park Resort"></div>
+                            <div id="parkpin-Hansa-Park" class="park-pin" style="top: 14%; left: 47%;" data-park="Hansa-Park"></div>
+                            <div id="parkpin-Erlebnispark-Tripsdrill" class="park-pin" style="top: 70%; left: 24%;" data-park="Erlebnispark Tripsdrill"></div>
+                            <div id="parkpin-Legoland-Deutschland" class="park-pin" style="top: 74%; left: 41%;" data-park="Legoland Deutschland"></div>
+                            <div id="parkpin-Movie-Park-Germany" class="park-pin" style="top: 40%; left: 15%;" data-park="Movie Park Germany"></div>
+                            <div id="parkpin-Plopsaland" class="park-pin" style="top: 61%; left: 19%;" data-park="Plopsaland (Holiday Park)"></div>
+                            <div id="parkpin-Serengeti-Park" class="park-pin" style="top: 31%; left: 42%;" data-park="Serengeti-Park"></div>
+                            <div id="parkpin-Bayern-Park" class="park-pin" style="top: 69%; left: 69%;" data-park="Bayern-Park"></div>
+                            
+                            <div id="parkpin-Belantis" class="park-pin" style="top: 49%; left: 66%;" data-park="Belantis"></div>
+                            <div id="parkpin-Fort-Fun" class="park-pin" style="top: 47%; left: 29%;" data-park="Fort Fun Abenteuerland"></div>
+                            <div id="parkpin-Plohn" class="park-pin" style="top: 55%; left: 69%;" data-park="Freizeitpark Plohn"></div>
+                            <div id="parkpin-Karls" class="park-pin" style="top: 12%; left: 66%;" data-park="Karls Erlebnis-Dorf"></div>
+                            <div id="parkpin-Skyline" class="park-pin" style="top: 77%; left: 49%;" data-park="Skyline Park"></div>
+                            <div id="parkpin-Rasti-Land" class="park-pin" style="top: 35%; left: 39%;" data-park="Rasti-Land"></div>
+                            <div id="parkpin-Schwaben-Park" class="park-pin" style="top: 69%; left: 32%;" data-park="Schwaben Park"></div>
+                            <div id="parkpin-Taunus" class="park-pin" style="top: 57%; left: 27%;" data-park="Taunus Wunderland"></div>
+                            <div id="parkpin-Geiselwind" class="park-pin" style="top: 61%; left: 49%;" data-park="Freizeit-Land Geiselwind"></div>
+                            <div id="parkpin-Potts-Park" class="park-pin" style="top: 36%; left: 29%;" data-park="Potts Park"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-right">
+            <div class="list-container apple-card split-grid">
+                <div class="grid-column">
+                    <h2>Top 20 Freizeitparks</h2>
+                    <div id="parks-liste"></div>
+                </div>
+                <div class="grid-column">
+                    <h2>Status nach Bundesland</h2>
+                    <div id="laender-liste"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="daten.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
