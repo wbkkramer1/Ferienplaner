@@ -3,7 +3,7 @@ let aktuellesDatum = new Date(2026, 4, 27); // Fixiert auf den 27. Mai 2026
 let ausgewaehltesBundesland = "Mecklenburg-Vorpommern";
 let ganzeWochePruefen = false;
 let apiLiveDaten = null; 
-let apiFehler = false; // Flag für optisches Feedback bei Serverproblemen
+let apiFehler = false;
 
 const MONATS_NAMEN = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 const WOCHEN_TAGE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
@@ -76,40 +76,29 @@ function formatiereSpanne(datum) {
     return `${t}.${m}.`;
 }
 
-// FIX: Robuster Daten-Tunnel mit integriertem Fallback-System
-async function ladeLiveCrowdDaten() {
-    const targetUrl = 'https://api.wartezeiten.app/v1/crowdlevel';
-    
-    // Versuch 1: AllOrigins Proxy (Schneller JSON-Abruf)
-    try {
-        const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
-        if (res.ok) {
-            const wrapper = await res.json();
-            if (wrapper.contents) {
-                apiLiveDaten = JSON.parse(wrapper.contents);
-                apiFehler = false;
-                updateDashboard();
-                return;
-            }
-        }
-    } catch (e) {
-        console.log("AllOrigins läuft ins Leere, schalte auf Fallback-Proxy um...");
-    }
-
-    // Versuch 2: Ausweich-Proxy (Bypass über ThingProxy)
-    try {
-        const resFallback = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`);
-        if (resFallback.ok) {
-            apiLiveDaten = await resFallback.json();
-            apiFehler = false;
-            updateDashboard();
-            return;
-        }
-    } catch (e) {
-        console.error("Sämtliche API-Tunnel blockiert. Nutze lokalen Prognose-Modus.");
-        apiFehler = true;
+// Global definierte Callback-Funktion für den JSONP-Bypass
+window.verarbeiteLiveDaten = function(daten) {
+    if (daten) {
+        apiLiveDaten = daten;
+        apiFehler = false;
+        console.log("Live-Daten nativ via JSONP geladen:", apiLiveDaten);
         updateDashboard();
     }
+};
+
+// FIX: Lädt die Daten direkt über ein dynamisches Script-Tag (JSONP-Verfahren)
+function ladeLiveCrowdDaten() {
+    const script = document.createElement('script');
+    // Die API unterstützt die Übergabe eines Callbacks nativ im URL-Parameter
+    script.src = 'https://api.wartezeiten.app/v1/crowdlevel?callback=verarbeiteLiveDaten';
+    
+    script.onerror = function() {
+        console.error("JSONP-Abruf fehlgeschlagen. Lokaler Prognosemodus aktiv.");
+        apiFehler = true;
+        updateDashboard();
+    };
+
+    document.body.appendChild(script);
 }
 
 function holeLiveProzentwert(parkApiId) {
@@ -279,9 +268,9 @@ function pruefeInfoboxText() {
         if (apiLiveDaten) {
             document.getElementById('info-box').textContent = `⚡ Live-Modus aktiv: Unterstützte Parks zeigen die prozentuale Echtzeit-Auslastung der API.`;
         } else if (apiFehler) {
-            document.getElementById('info-box').textContent = `⚠️ API-Server nicht erreichbar. Dashboard läuft stabil im Ferien-Prognosemodus.`;
+            document.getElementById('info-box').textContent = `⚠️ API-Server offline. Dashboard läuft stabil im lokalen Ferien-Prognosemodus.`;
         } else {
-            document.getElementById('info-box').textContent = `🔮 Verbindungs-Bypass: Synchronisiere mit Wartezeiten-Server...`;
+            document.getElementById('info-box').textContent = `⚡ Live-Modus aktiv: Synchronisiere Echtzeitdaten über JSONP...`;
         }
         return;
     }
