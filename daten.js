@@ -148,7 +148,16 @@ const TOP_PARKS = [
     { name: "Schwaben Park", ort: "Kaisersbach", bundesland: "Baden-Württemberg", url: "https://www.schwabenpark.de" },
     { name: "Taunus Wunderland", ort: "Schlangenbad", bundesland: "Hessen", url: "https://taunuswunderland.de" },
     { name: "Freizeit-Land Geiselwind", ort: "Geiselwind", bundesland: "Bayern", url: "https://freizeitland-geiselwind.de" },
-    { name: "Potts Park", ort: "Minden", bundesland: "Nordrhein-Westfalen", url: "https://www.pottspark.de" }
+    { name: "Potts Park", ort: "Minden", bundesland: "Nordrhein-Westfalen", url: "https://www.pottspark.de" },
+    // Die 10 neuen Parks im Datenstamm:
+    { name: "Ravensburger Spieleland", ort: "Meckenbeuren", bundesland: "Baden-Württemberg", url: "https://spieleland.de" },
+    { name: "Freizeitpark Lochmühle", ort: "Wehrheim", bundesland: "Hessen", url: "https://www.lochmuehle.de" },
+    { name: "Jaderpark", ort: "Jade", bundesland: "Niedersachsen", url: "https://www.jaderpark.de" },
+    { name: "Tier- und Freizeitpark Thüle", ort: "Friesoythe", bundesland: "Niedersachsen", url: "https://tier-und-freizeitpark-thuele.de" },
+    { name: "Churpfalzkreis", ort: "Roding", bundesland: "Bayern", url: "https://www.churpfalzpark.de" },
+    { name: "Eifel-Park", ort: "Gondorf", bundesland: "Rheinland-Pfalz", url: "https://www.eifelpark.de" },
+    { name: "Erlebnispark Steinau", ort: "Steinau an der Straße", bundesland: "Hessen", url: "https://www.erlebnispark-steinau.de" },
+    { name: "Safariland Stukenbrock", ort: "Schloß Holte-Stukenbrock", bundesland: "Nordrhein-Westfalen", url: "https://safariland-stukenbrock.de" }
 ];
 
 const FEIERTAGE_2026 = {
