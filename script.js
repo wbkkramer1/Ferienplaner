@@ -76,11 +76,10 @@ function formatiereSpanne(datum) {
     return `${t}.${m}.`;
 }
 
-// FIX: Holt die Live-Daten über einen stabilen CORS-Proxy-Verbund im Hintergrund
+// JETZT MIT DEN KORREKTEN DOKU-HEADER-DATEN ÜBER DEN PROXY-TUNNEL
 async function ladeLiveCrowdDaten() {
-    const targetUrl = 'https://api.wartezeiten.app/v1/crowdlevel';
+    const targetUrl = 'https://api.wartezeiten.app/v1/parks';
     
-    // Setze ein Sicherheitsnetz: Nach 4 Sekunden bricht das Laden ab und erzwingt das Dashboard
     setTimeout(() => {
         if (!apiGeladen) {
             console.log("API-Verbindung verlangsamt. Zeige Prognose-Modus.");
@@ -89,39 +88,45 @@ async function ladeLiveCrowdDaten() {
     }, 4000);
 
     try {
-        // Wir nutzen den stabilen cors-anywhere Mirror, der Anfragen von github.io akzeptiert
-        const response = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl));
+        // Wir jagen die Anfrage inklusive Doku-Header durch den stabilen corsproxy.io Tunnel
+        const response = await fetch('https://corsproxy.io/?' + encodeURIComponent(targetUrl), {
+            headers: {
+                'accept': 'application/json',
+                'language': 'de'
+            }
+        });
+        
         if (response.ok) {
-            const dataWrapper = await response.json();
+            apiLiveDaten = await response.json();
+            apiGeladen = true;
+            console.log("Live-Daten erfolgreich im Dashboard integriert!", apiLiveDaten);
+            updateDashboard();
+            return;
+        }
+    } catch (fehler) {
+        console.log("Fehler beim Laden über Haupt-Proxy. Versuche Ausweich-Tunnel...", fehler);
+    }
+
+    // Ausweich-Weg über AllOrigins falls corsproxy mal zickt
+    try {
+        const resFallback = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl));
+        if (resFallback.ok) {
+            const dataWrapper = await resFallback.json();
             if (dataWrapper.contents) {
                 apiLiveDaten = JSON.parse(dataWrapper.contents);
                 apiGeladen = true;
-                console.log("Live-Daten über HTTPS-Bypass geladen!");
                 updateDashboard();
-                return;
             }
         }
-    } catch (fehler) {
-        console.log("Primärer Proxy blockiert. Versuche Ausweich-Server...");
-    }
-
-    // Ausweich-Weg über einen zweiten freien API-Kanal
-    try {
-        const resFallback = await fetch('https://corsproxy.io/?' + encodeURIComponent(targetUrl));
-        if (resFallback.ok) {
-            apiLiveDaten = await resFallback.json();
-            apiGeladen = true;
-            updateDashboard();
-        }
     } catch (e) {
-        console.error("API temporär offline. Lokale Prognosen aktiv.");
+        console.error("Sämtliche API-Tunnel blockiert. Nutze lokalen Prognose-Modus.");
     }
 }
 
 function holeLiveProzentwert(parkApiId) {
     if (!apiLiveDaten || !parkApiId) return null;
     
-    // Prüft tagesgenau auf den 27. Mai
+    // Abgleich tagesgenau für den 27. Mai
     if (aktuellesDatum.getDate() === 27 && aktuellesDatum.getMonth() === 4) {
         const livePark = apiLiveDaten.find(p => p.id === parkApiId);
         if (livePark && livePark.crowdlevel !== undefined && livePark.crowdlevel !== null) {
@@ -163,8 +168,8 @@ window.addEventListener('DOMContentLoaded', () => {
     baueKalender();
     initMapHover(); 
     
-    updateDashboard(); // Lädt sofort die statische Übersicht
-    ladeLiveCrowdDaten(); // Holt asynchron die API-Daten nach
+    updateDashboard(); 
+    ladeLiveCrowdDaten(); 
 
     document.getElementById('state-select').addEventListener('change', (e) => {
         ausgewaehltesBundesland = e.target.value;
