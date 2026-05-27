@@ -1,5 +1,4 @@
-// Globale Zustände
-let aktuellesDatum = new Date(2026, 4, 27); // Fixiert auf den 27. Mai 2026
+let aktuellesDatum = new Date(2026, 4, 27); 
 let ausgewaehltesBundesland = "Mecklenburg-Vorpommern";
 let ganzeWochePruefen = false;
 
@@ -74,7 +73,6 @@ function formatiereSpanne(datum) {
     return `${t}.${m}.`;
 }
 
-// Kalenderbasierte, ausfallsichere Auslastungsberechnung
 function berechneParkAuslastung(park, testTage) {
     const hatFeiertag = testTage.some(tt => holeFeiertagsNameFuerLand(tt, park.bundesland) !== null);
     if (hatFeiertag) return "voll";
