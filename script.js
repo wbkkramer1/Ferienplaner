@@ -104,17 +104,15 @@ async function ladeLiveCrowdDaten() {
     }
 }
 
-// FIX: Zieht jetzt 'crowd_level' mit Unterstrich aus der Schnittstelle
+// Holt den Prozentwert aus dem AllOrigins-Datenpaket (mit zusätzlichem ID-Schutz)
 function holeLiveProzentwert(parkApiId) {
-    if (!apiLiveDaten || !parkApiId) return null;
+    if (!apiLiveDaten || !parkApiId || !Array.isArray(apiLiveDaten)) return null;
     
     // Prüft tagesgenau auf den 27. Mai
     if (aktuellesDatum.getDate() === 27 && aktuellesDatum.getMonth() === 4) {
-        const livePark = apiLiveDaten.find(p => p.id === parkApiId);
+        const livePark = apiLiveDaten.find(p => p && p.id === parkApiId);
         
-        // Abfrage auf crowd_level mit Unterstrich angepasst!
         if (livePark && livePark.crowd_level !== undefined && livePark.crowd_level !== null) {
-            // Konvertiert den Float-Wert (z.B. 12.43) in eine lesbare Ganzzahl (12%)
             return Math.round(parseFloat(livePark.crowd_level));
         }
     }
@@ -304,6 +302,7 @@ function pruefeInfoboxText() {
 
 function updateDashboard() {
     document.getElementById('selected-date-display').textContent = formatiereDatum(aktuellesDatum);
+    
     let testTage = [aktuellesDatum];
     if (ganzeWochePruefen) {
         testTage = [];
@@ -355,40 +354,44 @@ function updateDashboard() {
 
     const parksListe = document.getElementById('parks-liste');
     parksListe.innerHTML = '';
-    TOP_PARKS.forEach(park => {
-        const auslastung = berechneParkAuslastung(park, testTage);
-        const liveProzent = holeLiveProzentwert(park.apiId);
-        const parkItem = document.createElement('div');
-        parkItem.className = `park-item ${auslastung === 'voll' ? 'ferien' : (auslastung === 'maessig' ? 'maessig' : '')}`;
-        
-        let badgeText = "Leer";
-        if (auslastung === "voll") badgeText = "Voll";
-        if (auslastung === "maessig") badgeText = "Mäßig";
-        if (liveProzent !== null) badgeText = `${liveProzent}%`;
+    
+    if (Array.isArray(TOP_PARKS)) {
+        TOP_PARKS.forEach(park => {
+            const auslastung = berechneParkAuslastung(park, testTage);
+            const liveProzent = holeLiveProzentwert(park.apiId);
+            const parkItem = document.createElement('div');
+            parkItem.className = `park-item ${auslastung === 'voll' ? 'ferien' : (auslastung === 'maessig' ? 'maessig' : '')}`;
+            
+            let badgeText = "Leer";
+            if (auslastung === "voll") badgeText = "Voll";
+            if (auslastung === "maessig") badgeText = "Mäßig";
+            if (liveProzent !== null) badgeText = `${liveProzent}%`;
 
-        const istLive = (aktuellesDatum.getDate() === 27 && aktuellesDatum.getMonth() === 4 && apiLiveDaten && park.apiId);
-        parkItem.innerHTML = `
-            <div class="park-info">
-                <span class="park-name">${park.name}${istLive ? ' ⚡' : ''}</span>
-                <span class="park-ort">${park.ort} (${park.bundesland})</span>
-            </div>
-            <span class="park-status-badge state-${auslastung}">${badgeText}</span>
-        `;
-        parksListe.appendChild(parkItem);
+            const istLive = (aktuellesDatum.getDate() === 27 && aktuellesDatum.getMonth() === 4 && apiLiveDaten && park.apiId);
+            parkItem.innerHTML = `
+                <div class="park-info">
+                    <span class="park-name">${park.name}${istLive ? ' ⚡' : ''}</span>
+                    <span class="park-ort">${park.ort} (${park.bundesland})</span>
+                </div>
+                <span class="park-status-badge state-${auslastung}">${badgeText}</span>
+            `;
+            parksListe.appendChild(parkItem);
 
-        parkItem.addEventListener('click', () => {
-            document.getElementById('state-select').value = park.bundesland;
-            ausgewaehltesBundesland = park.bundesland;
-            updateDashboard();
+            parkItem.addEventListener('click', () => {
+                const selectElement = document.getElementById('state-select');
+                if (selectElement) selectElement.value = park.bundesland;
+                ausgewaehltesBundesland = park.bundesland;
+                updateDashboard();
+            });
+
+            document.querySelectorAll('.park-pin').forEach(pin => {
+                if (pin.getAttribute('data-park') === park.name) {
+                    pin.className = "park-pin"; 
+                    if (auslastung === "leer") pin.classList.add('leuchtet-gruen');
+                    if (auslastung === "maessig") pin.classList.add('leuchtet-gelb');
+                    if (auslastung === "voll") pin.classList.add('leuchtet-rot');
+                }
+            });
         });
-
-        document.querySelectorAll('.park-pin').forEach(pin => {
-            if (pin.getAttribute('data-park') === park.name) {
-                pin.className = "park-pin"; 
-                if (auslastung === "leer") pin.classList.add('leuchtet-gruen');
-                if (auslastung === "maessig") pin.classList.add('leuchtet-gelb');
-                if (auslastung === "voll") pin.classList.add('leuchtet-rot');
-            }
-        });
-    });
+    }
 }
