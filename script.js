@@ -1,5 +1,4 @@
-// Globale Zustände
-let aktuellesDatum = new Date(2026, 4, 27); // Fixiert auf den 27. Mai 2026
+let aktuellesDatum = new Date(2026, 4, 27); 
 let ausgewaehltesBundesland = "Mecklenburg-Vorpommern";
 let ganzeWochePruefen = false;
 
@@ -68,7 +67,6 @@ function formatiereDatumKurz(datum) {
     return `${datum.getDate()}.${datum.getMonth() + 1}.${datum.getFullYear()}`;
 }
 
-// Berechnet die Auslastung mathematisch über Kalenderdaten
 function berechneParkAuslastung(park, testTage) {
     const hatFeiertag = testTage.some(tt => holeFeiertagsNameFuerLand(tt, park.bundesland) !== null);
     if (hatFeiertag) return "voll";
@@ -80,11 +78,8 @@ function berechneParkAuslastung(park, testTage) {
     const hatNachbarFerien = nachbarn.some(nbl => testTage.some(tt => istInFerien(nbl, tt)));
     const hatWochenende = testTage.some(tt => tt.getDay() === 0 || tt.getDay() === 6);
 
-    if (hatNachbarFerien && hatWochenende) {
-        return "voll"; 
-    } else if (hatNachbarFerien || hatWochenende) {
-        return "maessig"; 
-    }
+    if (hatNachbarFerien && hatWochenende) return "voll"; 
+    else if (hatNachbarFerien || hatWochenende) return "maessig"; 
 
     return "leer"; 
 }
