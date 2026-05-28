@@ -104,7 +104,7 @@ header h1 span {
 
 .day-cell.today-highlight { border: 1px solid #0071e3 !important; color: #0071e3 !important; }
 .day-cell.active { background: #0071e3 !important; color: #ffffff !important; font-weight: 600; border-color: #0071e3 !important; }
-.day-cell.ferien-highlight { background-color: rgba(52, 199, 89, 0.12) !important; color: #1a7031 !important; font-weight: 500; }
+.day-cell.ferien-highlight { background-color: rgba(52, 199, 89, 0.12) !important; color: #ff3b30 !important; font-weight: 500; }
 .day-cell.feiertag-highlight { background-color: rgba(255, 59, 48, 0.08) !important; color: #ff3b30 !important; font-weight: 600; }
 
 /* ==========================================================================
@@ -160,8 +160,20 @@ header h1 span {
 }
 
 .cbox-north { top: 58px; left: 50%; transform: translateX(-50%); padding: 4px 10px; }
-.cbox-south-1 { bottom: 20px; left: 33.5%; transform: translateX(-50%); padding: 4px 10px; } 
-.cbox-south-2 { bottom: 20px; left: 45.5%; transform: translateX(-50%); padding: 4px 10px; } 
+
+/* REPARIERTE UND MITTIG ZENTRIERTE POSITIONEN FÜR DIE SÜDLICHEN LÄNDER */
+.cbox-south-1 { 
+    bottom: 20px; 
+    left: 23%; 
+    transform: translateX(-50%); 
+    padding: 4px 10px; 
+} 
+.cbox-south-2 { 
+    bottom: 20px; 
+    left: 73%; 
+    transform: translateX(-50%); 
+    padding: 4px 10px; 
+} 
 
 .cbox-west-1, .cbox-west-2, .cbox-west-3, .cbox-west-4,
 .cbox-east-1, .cbox-east-2 {
@@ -220,7 +232,6 @@ header h1 span {
    ========================================================================== */
 .list-container { padding: 15px; height: 100%; box-sizing: border-box; min-height: 0; display: flex; flex-direction: column; }
 
-/* FIX: Nutzt space-between, um die Blöcke perfekt austariert über die gesamte Kastenhöhe zu strecken */
 .split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; flex: 1; min-height: 0; height: 100%; }
 .grid-column { display: flex; flex-direction: column; justify-content: space-between; min-height: 0; height: 100%; flex: 1; overflow: hidden !important; }
 
@@ -230,7 +241,6 @@ header h1 span {
     letter-spacing: -0.2px; margin-bottom: 8px; flex-shrink: 0;
 }
 
-/* FIX: Erhöhtes Zeilen-Polster (gap: 4px) nutzt das Feld optimal aus */
 #parks-liste { display: flex; flex-direction: column; gap: 4px; flex: 1; justify-content: space-between; overflow-y: hidden !important; min-height: 0; }
 .combined-column { overflow-y: hidden !important; display: flex; flex-direction: column; justify-content: space-between; height: 100%; min-height: 0; }
 
@@ -240,7 +250,6 @@ header h1 span {
 .sub-section-euro { display: flex; flex-direction: column; flex-shrink: 0; }
 #euro-laender-liste { display: flex; flex-direction: column; gap: 4px; overflow-y: hidden !important; }
 
-/* FIX: Zeilenhöhe für den perfekten, gestreckten Look dezent auf 25px angehoben */
 .park-item, .land-item {
     display: flex; justify-content: space-between; align-items: center; padding: 2px 10px;
     background: #ffffff; border: 1px solid #e8e8ed; border-radius: 6px;
@@ -299,3 +308,71 @@ footer {
 }
 footer a { color: #0071e3; text-decoration: none; font-weight: 600; }
 footer a:hover { text-decoration: underline; }
+
+/* ==========================================================================
+   8. MOBILE BLOCKER LAYER (NUR AKTIV BEI HANDYS & TABLETS)
+   ========================================================================== */
+.mobile-blocker {
+    display: none; 
+}
+
+@media (max-width: 1024px) {
+    .dashboard-wrapper, header, footer {
+        display: none !important;
+    }
+    
+    body {
+        background-color: #f5f5f7;
+        overflow: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+    }
+
+    .mobile-blocker {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 30px;
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    .blocker-content {
+        background-color: #ffffff;
+        padding: 32px 24px;
+        border-radius: 16px;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        max-width: 400px;
+    }
+
+    .blocker-icon {
+        font-size: 40px;
+        margin-bottom: 16px;
+    }
+
+    .blocker-content h2 {
+        font-size: 20px;
+        font-weight: 600;
+        margin: 0 0 12px 0;
+        color: #1d1d1f;
+        letter-spacing: -0.4px;
+    }
+
+    .blocker-content p {
+        font-size: 13px;
+        line-height: 1.5;
+        color: #515154;
+        margin: 0 0 12px 0;
+    }
+
+    .blocker-content .blocker-sub {
+        font-weight: 500;
+        color: #0071e3;
+        margin-bottom: 0;
+    }
+}
