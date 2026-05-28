@@ -3,188 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Europa-Park Live-Auslastung</title>
-    <style>
-        :root {
-            --bg-color: #f4f7f6;
-            --card-bg: #ffffff;
-            --text-main: #2c3e50;
-            --accent-blue: #3498db;
-            --state-leer: #2ecc71;
-            --state-maessig: #f1c40f;
-            --state-voll: #e74c3c;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .container {
-            text-align: center;
-            background: var(--card-bg);
-            padding: 3rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            max-width: 400px;
-            width: 90%;
-        }
-
-        h1 {
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .ort {
-            color: #7f8c8d;
-            font-size: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .auslastung-kreis {
-            width: 180px;
-            height: 180px;
-            border-radius: 50%;
-            border: 8px solid #eee;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto 2rem auto;
-            transition: all 0.5s ease;
-        }
-
-        .prozent {
-            font-size: 3.5rem;
-            font-weight: bold;
-        }
-
-        .status-text {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-        }
-
-        .update-zeit {
-            font-size: 0.8rem;
-            color: #95a5a6;
-        }
-
-        .button {
-            background-color: var(--accent-blue);
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 25px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .button:hover {
-            background-color: #2980b9;
-        }
-
-        /* Ladestatus-Animation */
-        .loading .prozent {
-            font-size: 1.5rem;
-            color: #95a5a6;
-        }
-    </style>
+    <title>Ferien-Finder Deutschland 2026</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="container" id="app-box">
-    <h1>Europa-Park</h1>
-    <div class="ort">Rust, Deutschland</div>
+    <header>
+        <div class="header-blur"></div>
+        <div class="header-content">
+            <h1>Ferien-Finder <span>2026</span></h1>
+        </div>
+    </header>
 
-    <div class="auslastung-kreis" id="kreis">
-        <div class="prozent" id="wert">--</div>
+    <div class="dashboard-wrapper">
+        
+        <div class="sidebar-left">
+            <div class="controls-inner apple-card">
+                <h2 id="selected-date-display">27. Mai 2026</h2>
+                
+                <select id="state-select" class="state-dropdown">
+                    </select>
+
+                <label class="week-toggle">
+                    <input type="checkbox" id="week-check">
+                    <span class="custom-switch"></span>
+                    <span class="toggle-text">Ganze Woche prüfen</span>
+                </label>
+            </div>
+
+            <div id="calendar-container" class="yearly-calendar apple-card">
+                </div>
+        </div>
+
+        <div class="map-area apple-card">
+            <div id="info-box">Lade Ferien-Finder...</div>
+            
+            <div class="maps-horizontal-container">
+                <div class="map-wrapper-outer">
+                    <div class="map-container">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Karte_Deutsche_Bundesl%C3%A4nder_%28Bezeichner%29.svg" alt="Deutschland Karte" id="de-map">
+                        <div class="pin-overlay">
+                            <div id="pin-DE-SH" class="ferien-pin" style="top: 7%; left: 37%;" data-land="Schleswig-Holstein"></div>
+                            <div id="pin-DE-MV" class="ferien-pin" style="top: 13%; left: 68%;" data-land="Mecklenburg-Vorpommern"></div>
+                            <div id="pin-DE-HH" class="ferien-pin" style="top: 22%; left: 45%;" data-land="Hamburg"></div>
+                            <div id="pin-DE-HB" class="ferien-pin" style="top: 20.5%; left: 28%;" data-land="Bremen"></div>
+                            <div id="pin-DE-NI" class="ferien-pin" style="top: 34%; left: 40%;" data-land="Niedersachsen"></div>
+                            <div id="pin-DE-BB" class="ferien-pin" style="top: 38%; left: 86%;" data-land="Brandenburg"></div>
+                            <div id="pin-DE-BE" class="ferien-pin" style="top: 27%; left: 81.5%;" data-land="Berlin"></div>
+                            <div id="pin-DE-ST" class="ferien-pin" style="top: 34.5%; left: 61.5%;" data-land="Sachsen-Anhalt"></div>
+                            <div id="pin-DE-NW" class="ferien-pin" style="top: 41%; left: 24%;" data-land="Nordrhein-Westfalen"></div>
+                            <div id="pin-DE-HE" class="ferien-pin" style="top: 51.5%; left: 30.5%;" data-land="Hessen"></div>
+                            <div id="pin-DE-TH" class="ferien-pin" style="top: 54.5%; left: 51.5%;" data-land="Thüringen"></div>
+                            <div id="pin-DE-SN" class="ferien-pin" style="top: 52%; left: 77%;" data-land="Sachsen"></div>
+                            <div id="pin-DE-RP" class="ferien-pin" style="top: 57%; left: 10%;" data-land="Rheinland-Pfalz"></div>
+                            <div id="pin-DE-SL" class="ferien-pin" style="top: 72%; left: 8%;" data-land="Saarland"></div>
+                            <div id="pin-DE-BW" class="ferien-pin" style="top: 75%; left: 36%;" data-land="Baden-Württemberg"></div>
+                            <div id="pin-DE-BY" class="ferien-pin" style="top: 70%; left: 60%;" data-land="Bayern"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="map-wrapper-outer parks-map">
+                    <div class="map-container">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Karte_Deutsche_Bundesl%C3%A4nder_%28Bezeichner%29.svg" alt="Freizeitpark Karte">
+                        <div class="pin-overlay">
+                            <div id="parkpin-Europa-Park" class="park-pin" style="top: 75%; left: 14%;" data-park="Europa-Park"></div>
+                            <div id="parkpin-Phantasialand" class="park-pin" style="top: 46%; left: 16%;" data-park="Phantasialand"></div>
+                            <div id="parkpin-Heide-Park-Resort" class="park-pin" style="top: 29%; left: 45%;" data-park="Heide Park Resort"></div>
+                            <div id="parkpin-Hansa-Park" class="park-pin" style="top: 14%; left: 47%;" data-park="Hansa-Park"></div>
+                            <div id="parkpin-Erlebnispark-Tripsdrill" class="park-pin" style="top: 70%; left: 24%;" data-park="Erlebnispark Tripsdrill"></div>
+                            <div id="parkpin-Legoland-Deutschland" class="park-pin" style="top: 74%; left: 41%;" data-park="Legoland Deutschland"></div>
+                            <div id="parkpin-Movie-Park-Germany" class="park-pin" style="top: 40%; left: 15%;" data-park="Movie Park Germany"></div>
+                            <div id="parkpin-Plopsaland" class="park-pin" style="top: 61%; left: 19%;" data-park="Plopsaland (Holiday Park)"></div>
+                            <div id="parkpin-Serengeti-Park" class="park-pin" style="top: 31%; left: 42%;" data-park="Serengeti-Park"></div>
+                            <div id="parkpin-Bayern-Park" class="park-pin" style="top: 69%; left: 69%;" data-park="Bayern-Park"></div>
+                            <div id="parkpin-Belantis" class="park-pin" style="top: 49%; left: 66%;" data-park="Belantis"></div>
+                            <div id="parkpin-Fort-Fun" class="park-pin" style="top: 47%; left: 29%;" data-park="Fort Fun Abenteuerland"></div>
+                            <div id="parkpin-Plohn" class="park-pin" style="top: 55%; left: 69%;" data-park="Freizeitpark Plohn"></div>
+                            <div id="parkpin-Karls" class="park-pin" style="top: 12%; left: 66%;" data-park="Karls Erlebnis-Dorf"></div>
+                            <div id="parkpin-Skyline" class="park-pin" style="top: 77%; left: 49%;" data-park="Skyline Park"></div>
+                            <div id="parkpin-Rasti-Land" class="park-pin" style="top: 35%; left: 39%;" data-park="Rasti-Land"></div>
+                            <div id="parkpin-Schwaben-Park" class="park-pin" style="top: 69%; left: 32%;" data-park="Schwaben Park"></div>
+                            <div id="parkpin-Taunus" class="park-pin" style="top: 57%; left: 27%;" data-park="Taunus Wunderland"></div>
+                            <div id="parkpin-Geiselwind" class="park-pin" style="top: 61%; left: 49%;" data-park="Freizeit-Land Geiselwind"></div>
+                            <div id="parkpin-Potts-Park" class="park-pin" style="top: 36%; left: 29%;" data-park="Potts Park"></div>
+                            
+                            <div id="parkpin-Ravensburger-Spieleland" class="park-pin" style="top: 86%; left: 34%;" data-park="Ravensburger Spieleland"></div>
+                            <div id="parkpin-Lochmuehle" class="park-pin" style="top: 55%; left: 31%;" data-park="Freizeitpark Lochmühle"></div>
+                            <div id="parkpin-Jaderpark" class="park-pin" style="top: 18%; left: 29%;" data-park="Jaderpark"></div>
+                            <div id="parkpin-Thuele" class="park-pin" style="top: 24%; left: 29%;" data-park="Tier- und Freizeitpark Thüle"></div>
+                            <div id="parkpin-Churpfalzkreis" class="park-pin" style="top: 73%; left: 66%;" data-park="Churpfalzkreis"></div>
+                            <div id="parkpin-Eifel-Park" class="park-pin" style="top: 56%; left: 11%;" data-park="Eifel-Park"></div>
+                            <div id="parkpin-Steinau" class="park-pin" style="top: 56%; left: 40%;" data-park="Erlebnispark Steinau"></div>
+                            <div id="parkpin-Stukenbrock" class="park-pin" style="top: 39%; left: 34%;" data-park="Safariland Stukenbrock"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-right">
+            <div class="list-container apple-card split-grid">
+                <div class="grid-column">
+                    <h2>Top Freizeitparks</h2>
+                    <div id="parks-liste"></div>
+                </div>
+                <div class="grid-column">
+                    <h2>Status nach Bundesland</h2>
+                    <div id="laender-liste"></div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <div class="status-text" id="status">Lade Live-Daten...</div>
-    
-    <button class="button" onclick="holeEuropaParkDaten()">Jetzt aktualisieren</button>
-    <div class="update-zeit" id="zeit" style="margin-top: 1rem;"></div>
-</div>
-
-<script>
-    async function holeEuropaParkDaten() {
-        const wertAnzeige = document.getElementById('wert');
-        const statusAnzeige = document.getElementById('status');
-        const kreis = document.getElementById('kreis');
-        const zeitAnzeige = document.getElementById('zeit');
-        
-        wertAnzeige.innerText = "⏳";
-        statusAnzeige.innerText = "Verbindung wird aufgebaut...";
-        
-        // Wir nutzen den direkten JSON-Proxy von AllOrigins ohne blockierende Header
-        const targetUrl = 'https://api.wartezeiten.app/v1/parks';
-        
-        try {
-            const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
-            if (!response.ok) throw new Error('Proxy antwortet nicht');
-            
-            const dataWrapper = await response.json();
-            if (!dataWrapper.contents) throw new Error('Kein Inhalt empfangen');
-            
-            const parks = JSON.parse(dataWrapper.contents);
-            
-            // Suche den Europa-Park über die exakte API-ID 'europapark'
-            const europaPark = parks.find(p => p && p.id === 'europapark');
-            
-            if (europaPark) {
-                // Auslesen des Feldes (wir prüfen beide API-Schreibweisen ab)
-                const levelRaw = europaPark.crowd_level !== undefined ? europaPark.crowd_level : europaPark.crowdlevel;
-                
-                if (levelRaw !== undefined && levelRaw !== null) {
-                    const prozentwert = Math.round(parseFloat(levelRaw));
-                    
-                    // Werte auf dem Bildschirm anzeigen
-                    wertAnzeige.innerHTML = `${prozentwert}<span style="font-size: 1.5rem;">%</span>`;
-                    
-                    // Farben und Zustandstexte dynamisch anpassen
-                    if (prozentwert >= 65) {
-                        statusAnzeige.innerText = "Sehr voll (Lange Wartezeiten)";
-                        statusAnzeige.style.color = "var(--state-voll)";
-                        kreis.style.borderColor = "var(--state-voll)";
-                    } else if (prozentwert >= 35) {
-                        statusAnzeige.innerText = "Mäßig besucht (Normalbetrieb)";
-                        statusAnzeige.style.color = "var(--state-maessig)";
-                        kreis.style.borderColor = "var(--state-maessig)";
-                    } else {
-                        statusAnzeige.innerText = "Sehr leer (Freie Fahrt!)";
-                        statusAnzeige.style.color = "var(--state-leer)";
-                        kreis.style.borderColor = "var(--state-leer)";
-                    }
-                    
-                    // Zeitstempel setzen
-                    const jetzt = new Date();
-                    zeitAnzeige.innerText = `Zuletzt aktualisiert: ${jetzt.toLocaleTimeString('de-DE')} Uhr`;
-                    return;
-                }
-            }
-            throw new Error('Parkdaten unvollständig');
-            
-        } catch (fehler) {
-            console.error(fehler);
-            wertAnzeige.innerText = "❌";
-            statusAnzeige.innerText = "Fehler beim Laden der Live-Daten.";
-            statusAnzeige.style.color = "var(--state-voll)";
-            kreis.style.borderColor = "#eee";
-            zeitAnzeige.innerText = "Bitte versuche es gleich noch einmal.";
-        }
-    }
-
-    // Beim ersten Laden der Seite sofort die Daten abrufen
-    document.addEventListener('DOMContentLoaded', holeEuropaParkDaten);
-</script>
-
+    <script src="daten.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
