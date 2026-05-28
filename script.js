@@ -1,4 +1,5 @@
-let aktuellesDatum = new Date(2026, 4, 27); 
+// Globale Zustände - Startet jetzt sauber mit dem aktuellen Datum
+let aktuellesDatum = new Date(); 
 let ausgewaehltesBundesland = "Mecklenburg-Vorpommern";
 let ganzeWochePruefen = false;
 
@@ -180,46 +181,78 @@ function baueKalender() {
 }
 
 function initMapHover() {
+    const tooltip = document.getElementById('map-tooltip');
+
     document.querySelectorAll('.ferien-pin').forEach(pin => {
         const blName = pin.getAttribute('data-land');
-        pin.addEventListener('mouseenter', () => {
+        
+        pin.addEventListener('mouseenter', (e) => {
             const feiertagName = holeFeiertagsNameFuerLand(aktuellesDatum, blName);
+            const zeitraum = holeAktuellenFerienZeitraum(blName, aktuellesDatum);
+            let text = "";
+            
             if (feiertagName) {
-                document.getElementById('info-box').textContent = `${blName}: 🗓️ Gesetzlicher Feiertag (${feiertagName})`;
+                text = `${blName}: 🗓️ Feiertag (${feiertagName})`;
+            } else if (zeitraum) {
+                let name = zeitraum.name;
+                if (!name) {
+                    const mStart = zeitraum.start.getMonth();
+                    if (mStart === 0 || mStart === 1) name = "Winterferien";
+                    else if (mStart === 2 || mStart === 3) name = "Osterferien";
+                    else if (mStart === 4 || mStart === 5) name = "Pfingstferien";
+                    else if (mStart === 6 || mStart === 7) name = "Sommerferien";
+                    else if (mStart === 9 || mStart === 10) name = "Herbstferien";
+                    else name = "Weihnachtsferien";
+                } else if (!name.toLowerCase().includes('ferien')) {
+                    name = name + "ferien";
+                }
+                
+                const vonStr = formatiereDatumKurz(zeitraum.start);
+                const bisStr = formatiereDatumKurz(zeitraum.ende);
+                text = `${blName}: ☀️ ${name} (${vonStr} – ${bisStr})`;
             } else {
-                const hatFerien = [aktuellesDatum].some(tt => istInFerien(blName, tt));
-                document.getElementById('info-box').textContent = `${blName}: ${hatFerien ? 'Ferienbetrieb (Voll)' : 'Reguläre Schulzeit (Frei)'}`;
+                text = `${blName}: Reguläre Schulzeit`;
             }
+
+            tooltip.textContent = text;
+            tooltip.style.display = 'block';
         });
+
+        pin.addEventListener('mousemove', (e) => {
+            tooltip.style.top = (e.clientY + 15) + 'px';
+            tooltip.style.left = (e.clientX + 15) + 'px';
+        });
+        
         pin.addEventListener('mouseleave', () => {
-            pruefeInfoboxText();
+            tooltip.style.display = 'none';
         });
     });
 
     document.querySelectorAll('.park-pin').forEach(pin => {
         const parkName = pin.getAttribute('data-park');
         
-        pin.addEventListener('mouseenter', () => {
+        pin.addEventListener('mouseenter', (e) => {
             const parkGefunden = TOP_PARKS.find(p => p.name === parkName);
             if (parkGefunden) {
                 const status = berechneParkAuslastung(parkGefunden, [aktuellesDatum]);
                 let statusText = "";
                 
-                if (status === "voll") {
-                    const feiertagName = holeFeiertagsNameFuerLand(aktuellesDatum, parkGefunden.bundesland);
-                    statusText = feiertagName ? `Voll (Feiertag: ${feiertagName})` : `Voll (Ferien in ${parkGefunden.bundesland})`;
-                }
-                if (status === "maessig") {
-                    statusText = (aktuellesDatum.getDay() === 0 || aktuellesDatum.getDay() === 6) ? `Mäßig (Wochenend-Andrang)` : `Mäßig (Nachbarferien)`;
-                }
-                if (status === "leer") statusText = `Leer (Freie Fahrt!)`;
+                if (status === "voll") statusText = `🔴 Voll`;
+                if (status === "maessig") statusText = `🟡 Mäßig`;
+                if (status === "leer") statusText = `🟢 Leer`;
                 
-                document.getElementById('info-box').textContent = `${parkGefunden.name} (${parkGefunden.ort}) • ${statusText} • [Klicken für Website]`;
+                tooltip.textContent = `${parkGefunden.name}: ${statusText}`;
+                tooltip.style.display = 'block';
             }
+        });
+
+        pin.addEventListener('mousemove', (e) => {
+            tooltip.style.top = (e.clientY + 15) + 'px';
+            tooltip.style.left = (e.clientX + 15) + 'px';
         });
         
         pin.addEventListener('mouseleave', () => {
-            pruefeInfoboxText();
+            tooltip.style.display = 'none';
         });
 
         pin.addEventListener('click', () => {
@@ -248,6 +281,7 @@ function pruefeInfoboxText() {
         return;
     }
 
+    // FIX: Das fehlerhafte Wort "blackout" wurde sauber entfernt
     if ((aktuellesDatum.getDay() === 0 || aktuellesDatum.getDay() === 6) && !ganzeWochePruefen) {
         document.getElementById('info-box').textContent = `Wochenende am ${formatiereDatumKurz(aktuellesDatum)} • Erhöhtes Basisaufkommen in allen Freizeitparks.`;
         return;
@@ -304,10 +338,8 @@ function updateDashboard() {
         let ferienNameZusatz = "";
 
         if (zeitraum) {
-            // FIX: Wenn ein Ferienname im Zeitraum-Objekt fehlt, benennen wir es anhand der Namen aus daten.js
             let name = zeitraum.name;
             if (!name) {
-                // Automatischer Fallback, falls in daten.js der Name-String fehlt
                 const mStart = zeitraum.start.getMonth();
                 if (mStart === 0 || mStart === 1) name = "Winter";
                 else if (mStart === 2 || mStart === 3) name = "Ostern";

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   1. APPLE STYLE BASE (LIGHT MINIMALISM)
+   1. STYLE BASE (LIGHT MINIMALISM)
    ========================================================================== */
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -46,7 +46,7 @@ header h1 span {
 }
 
 /* ==========================================================================
-   2. THE APPLE CARD (WHITE ENCLOSURES)
+   2. THE MAIN CARDS (WHITE ENCLOSURES)
    ========================================================================== */
 .apple-card {
     background-color: #ffffff;
@@ -80,41 +80,39 @@ header h1 span {
 .week-toggle input:checked + .custom-switch::after { transform: translateX(20px); }
 
 /* ==========================================================================
-   3. APPLE SYSTEM CALENDAR (WITH DECENT WEEKEND MARKING)
+   3. SYSTEM CALENDAR (ULTRA-KOMPAKT-MODUS OHNE SCROLLEN)
    ========================================================================== */
 .yearly-calendar { 
     flex: 1; 
     display: grid; 
     grid-template-columns: repeat(3, 1fr); 
-    gap: 8px; 
-    padding: 12px; 
-    overflow-y: hidden; 
+    gap: 4px 6px;       /* Spalten- und Zeilenabstand minimiert */
+    padding: 8px;       /* Innenabstand der Hauptkarte verringert */
+    overflow-y: hidden; /* Scrollen komplett deaktiviert, da jetzt alles reinpasst */
 }
 .month-box { background: transparent; padding: 0; }
-.month-title { font-weight: 600; text-align: left; font-size: 9.5px; margin-bottom: 4px; color: #86868b; text-transform: uppercase; letter-spacing: 0.5px; }
+.month-title { font-weight: 600; text-align: left; font-size: 9px; margin-bottom: 2px; color: #86868b; text-transform: uppercase; letter-spacing: 0.5px; }
 .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; text-align: center; }
 
-/* Header-Kürzel: Sa und So dezent abdunkeln */
-.day-header { font-size: 8px; color: #1d1d1f; font-weight: 500; padding-bottom: 2px; }
+.day-header { font-size: 7.5px; color: #1d1d1f; font-weight: 500; padding-bottom: 2px; }
 .day-header:nth-child(6), .day-header:nth-child(7) { color: #86868b; }
 
-.day-cell { font-size: 9.5px; padding: 3.5px 0; border-radius: 50%; cursor: pointer; color: #1d1d1f; font-weight: 500; transition: background 0.1s; border: 1px solid transparent; box-sizing: border-box; }
+/* FIX: Padding und Schriftgröße dezent verringert, damit die Zeilen weniger Höhe fressen */
+.day-cell { font-size: 9px; padding: 2px 0; border-radius: 50%; cursor: pointer; color: #1d1d1f; font-weight: 500; transition: background 0.1s; border: 1px solid transparent; box-sizing: border-box; }
 .day-cell.empty { cursor: default; background: transparent; border: none; }
 .day-cell:not(.empty):hover { background-color: #f5f5f7; }
 
-/* FIX: Samstage und Sonntage im Monatsraster edel abdunkeln */
 .day-cell:nth-child(7n-1), .day-cell:nth-child(7n) { color: #86868b; }
 
-/* Highlights (Überschreiben die Wochenend-Farbe bei Relevanz) */
-.day-cell.ferien-highlight { background-color: rgba(52, 199, 89, 0.12) !important; color: #1a7031 !important; font-weight: 600; }
-.day-cell.feiertag-highlight { background-color: rgba(255, 59, 48, 0.08) !important; color: #ff3b30 !important; font-weight: 600; }
 .day-cell.today-highlight { border: 1px solid #0071e3 !important; color: #0071e3 !important; }
 .day-cell.active { background: #0071e3 !important; color: #ffffff !important; font-weight: 600; border-color: #0071e3 !important; }
+.day-cell.ferien-highlight { background-color: rgba(52, 199, 89, 0.12) !important; color: #1a7031 !important; font-weight: 500; }
+.day-cell.feiertag-highlight { background-color: rgba(255, 59, 48, 0.08) !important; color: #ff3b30 !important; font-weight: 600; }
 
 /* ==========================================================================
    4. MITTLERE SPALTE: APPLE KARTEN
    ========================================================================== */
-.map-area { flex: 1; display: flex; flex-direction: column; padding: 20px; min-height: 0; }
+.map-area { flex: 1; display: flex; flex-direction: column; padding: 20px; min-height: 0; overflow: hidden; }
 
 #info-box {
     padding: 10px 15px; background: #f5f5f7; border-radius: 10px;
@@ -122,13 +120,13 @@ header h1 span {
     color: #1d1d1f; border: 1px solid rgba(0,0,0,0.02);
 }
 
-.maps-horizontal-container { display: flex; flex: 1; width: 100%; gap: 20px; min-height: 0; }
-.map-wrapper-outer { flex: 1; display: flex; justify-content: center; align-items: center; min-height: 0; }
+.maps-horizontal-container { display: flex; flex: 1; width: 100%; gap: 20px; min-height: 0; overflow: hidden; }
+.map-wrapper-outer { flex: 1; display: flex; justify-content: center; align-items: center; min-height: 0; overflow: hidden; }
 .map-wrapper-outer.parks-map { border-left: 1px solid #e8e8ed; padding-left: 20px; }
 
-.map-container { height: 100%; max-height: 540px; aspect-ratio: 400 / 580; position: relative; }
+.map-container { height: 100%; max-height: 540px; max-width: 100%; aspect-ratio: 400 / 580; position: relative; }
 .map-container img { 
-    width: 100%; height: 100%; object-fit: contain; 
+    width: 100%; height: 100%; max-width: 100%; object-fit: contain; 
     filter: brightness(1.02) contrast(0.85) saturate(0.1) opacity(0.5); 
 }
 
@@ -174,7 +172,7 @@ header h1 span {
 .park-item, .land-item {
     display: flex; justify-content: space-between; align-items: center; padding: 0 12px;
     background: #ffffff; border: 1px solid #e8e8ed; border-radius: 10px;
-    cursor: pointer; transition: all 0.1s; height: 38px; box-sizing: border-box;
+    cursor: default; transition: all 0.1s; height: 38px; box-sizing: border-box;
 }
 .park-item:hover, .land-item:hover { background-color: #f5f5f7; }
 
@@ -193,78 +191,54 @@ header h1 span {
 .park-status-badge.state-voll, .land-item.ferien .status-badge { background-color: #fde8e8; color: #cc2214; }
 
 #laender-liste { display: flex; flex-direction: column; gap: 5px; flex: 1; overflow-y: auto; padding-right: 4px; }
-.land-item { font-size: 11.5px; font-weight: 500; cursor: default; }
+.land-item { font-size: 11.5px; font-weight: 500; }
 
+/* GLOBALE SCROLLBARS */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #d2d2d7; border-radius: 4px; }
 
+/* ==========================================================================
+   6. MOUSE-OVER TOOLTIP POPUP DESIGN
+   ========================================================================== */
+#map-tooltip {
+    position: fixed;
+    display: none;
+    pointer-events: none;
+    background-color: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1d1d1f;
+    z-index: 9999;
+    line-height: 1.4;
+    white-space: nowrap;
+}
 
 /* ==========================================================================
-   6. MOBIL-REVOLUTION (NUR AKTIV, WENN AUF EINEM HANDY GELADEN)
+   7. FOOTER STYLING
    ========================================================================== */
-@media (max-width: 1100px) {
-    body {
-        height: auto;
-        overflow: auto; /* Erlaubt vertikales Scrollen auf dem Handy */
-        padding: 10px;
-    }
+footer {
+    width: 100%;
+    text-align: center;
+    padding: 10px 0;
+    background-color: #f5f5f7;
+    border-top: 1px solid rgba(0, 0, 0, 0.03);
+    font-size: 11px;
+    color: #86868b;
+    flex-shrink: 0;
+}
 
-    .dashboard-wrapper {
-        flex-direction: column; /* Stapelt die Boxen untereinander */
-        height: auto;
-        overflow: visible;
-        gap: 15px;
-        padding: 0;
-    }
+footer a {
+    color: #0071e3;
+    text-decoration: none;
+    font-weight: 600;
+}
 
-    .sidebar-left, .sidebar-right {
-        flex: none;
-        width: 100%; /* Boxen nutzen die volle Breite des Handybildschirms */
-    }
-
-    .yearly-calendar {
-        display: flex;
-        overflow-x: auto; /* Macht den Riesenkalender mobil zu einer Swipe-Box! */
-        overflow-y: hidden;
-        gap: 10px;
-        padding: 15px 10px;
-    }
-
-    .month-box {
-        flex: 0 0 280px; /* Breite jedes Monats im horizontalen Daumen-Slider */
-    }
-
-    .maps-horizontal-container {
-        flex-direction: column; /* Karten brechen sauber untereinander */
-        gap: 15px;
-    }
-
-    .map-wrapper-outer {
-        padding: 15px 0;
-    }
-
-    .map-wrapper-outer.parks-map {
-        border-left: none; /* Entfernt die störende Trennlinie auf Mobile */
-        padding-left: 0;
-        border-top: 1px solid #e8e8ed; /* Setzt stattdessen eine saubere Trennung oben hin */
-        padding-top: 20px;
-    }
-
-    .map-container {
-        width: 100%;
-        max-width: 340px; /* Skaliert die Deutschlandkarte perfekt für Handys */
-        height: auto;
-        aspect-ratio: 400 / 580;
-    }
-
-    .split-grid {
-        grid-template-columns: 1fr; /* Spaltet die zwei rechten Listen untereinander auf */
-        gap: 20px;
-    }
-
-    #parks-liste, #laender-liste {
-        max-height: 350px; /* Verhindert unendliche Listen und nutzt internen Scroll */
-        overflow-y: auto;
-    }
+footer a:hover {
+    text-decoration: underline;
 }
