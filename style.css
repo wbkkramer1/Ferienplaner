@@ -198,3 +198,73 @@ header h1 span {
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #d2d2d7; border-radius: 4px; }
+
+
+/* ==========================================================================
+   6. MOBIL-REVOLUTION (NUR AKTIV, WENN AUF EINEM HANDY GELADEN)
+   ========================================================================== */
+@media (max-width: 1100px) {
+    body {
+        height: auto;
+        overflow: auto; /* Erlaubt vertikales Scrollen auf dem Handy */
+        padding: 10px;
+    }
+
+    .dashboard-wrapper {
+        flex-direction: column; /* Stapelt die Boxen untereinander */
+        height: auto;
+        overflow: visible;
+        gap: 15px;
+        padding: 0;
+    }
+
+    .sidebar-left, .sidebar-right {
+        flex: none;
+        width: 100%; /* Boxen nutzen die volle Breite des Handybildschirms */
+    }
+
+    .yearly-calendar {
+        display: flex;
+        overflow-x: auto; /* Macht den Riesenkalender mobil zu einer Swipe-Box! */
+        overflow-y: hidden;
+        gap: 10px;
+        padding: 15px 10px;
+    }
+
+    .month-box {
+        flex: 0 0 280px; /* Breite jedes Monats im horizontalen Daumen-Slider */
+    }
+
+    .maps-horizontal-container {
+        flex-direction: column; /* Karten brechen sauber untereinander */
+        gap: 15px;
+    }
+
+    .map-wrapper-outer {
+        padding: 15px 0;
+    }
+
+    .map-wrapper-outer.parks-map {
+        border-left: none; /* Entfernt die störende Trennlinie auf Mobile */
+        padding-left: 0;
+        border-top: 1px solid #e8e8ed; /* Setzt stattdessen eine saubere Trennung oben hin */
+        padding-top: 20px;
+    }
+
+    .map-container {
+        width: 100%;
+        max-width: 340px; /* Skaliert die Deutschlandkarte perfekt für Handys */
+        height: auto;
+        aspect-ratio: 400 / 580;
+    }
+
+    .split-grid {
+        grid-template-columns: 1fr; /* Spaltet die zwei rechten Listen untereinander auf */
+        gap: 20px;
+    }
+
+    #parks-liste, #laender-liste {
+        max-height: 350px; /* Verhindert unendliche Listen und nutzt internen Scroll */
+        overflow-y: auto;
+    }
+}
