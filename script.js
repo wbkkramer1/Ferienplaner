@@ -1,4 +1,4 @@
-// Globale Zustände - Startet jetzt sauber mit dem aktuellen Datum
+// Globale Zustände - Startet sauber mit dem aktuellen Datum
 let aktuellesDatum = new Date(); 
 let ausgewaehltesBundesland = "Mecklenburg-Vorpommern";
 let ganzeWochePruefen = false;
@@ -6,23 +6,24 @@ let ganzeWochePruefen = false;
 const MONATS_NAMEN = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 const WOCHEN_TAGE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
-const NACHBAR_MAP = {
-    "Baden-Württemberg": ["Bayern", "Hessen", "Rheinland-Pfalz"],
-    "Bayern": ["Baden-Württemberg", "Hessen", "Thüringen", "Sachsen"],
-    "Berlin": ["Brandenburg"],
-    "Brandenburg": ["Berlin", "Mecklenburg-Vorpommern", "Sachsen", "Sachsen-Anhalt", "Niedersachsen"],
-    "Bremen": ["Niedersachsen"],
-    "Hamburg": ["Schleswig-Holstein", "Niedersachsen"],
-    "Hessen": ["Nordrhein-Westfalen", "Rheinland-Pfalz", "Baden-Württemberg", "Bayern", "Thüringen", "Niedersachsen"],
-    "Mecklenburg-Vorpommern": ["Schleswig-Holstein", "Niedersachsen", "Brandenburg"],
-    "Niedersachsen": ["Schleswig-Holstein", "Hamburg", "Bremen", "Mecklenburg-Vorpommern", "Brandenburg", "Sachsen-Anhalt", "Thüringen", "Hessen", "Nordrhein-Westfalen"],
-    "Nordrhein-Westfalen": ["Niedersachsen", "Hessen", "Rheinland-Pfalz"],
-    "Rheinland-Pfalz": ["Nordrhein-Westfalen", "Hessen", "Baden-Württemberg", "Saarland"],
-    "Saarland": ["Rheinland-Pfalz"],
-    "Sachsen": ["Brandenburg", "Sachsen-Anhalt", "Thüringen", "Bayern"],
-    "Sachsen-Anhalt": ["Niedersachsen", "Brandenburg", "Sachsen", "Thüringen"],
-    "Schleswig-Holstein": ["Hamburg", "Niedersachsen", "Mecklenburg-Vorpommern"],
-    "Thüringen": ["Niedersachsen", "Hessen", "Bayern", "Sachsen", "Sachsen-Anhalt"]
+// Deine exakte rote Linien-Zuordnung aus der Skizze
+const EURO_NACHBAR_MAP = {
+    "Schleswig-Holstein": ["Dänemark"],
+    "Hamburg": ["Dänemark"],
+    "Mecklenburg-Vorpommern": ["Dänemark", "Polen"],
+    "Bremen": ["Niederlande"],
+    "Niedersachsen": ["Niederlande"],
+    "Nordrhein-Westfalen": ["Niederlande", "Belgien"],
+    "Rheinland-Pfalz": ["Belgien", "Luxemburg"],
+    "Saarland": ["Luxemburg", "Frankreich"],
+    "Baden-Württemberg": ["Frankreich", "Schweiz"],
+    "Bayern": ["Schweiz", "Österreich"],
+    "Hessen": ["Luxemburg"],
+    "Thüringen": [], 
+    "Sachsen-Anhalt": [],
+    "Berlin": [],
+    "Brandenburg": ["Polen"],
+    "Sachsen": ["Polen", "Tschechien"]
 };
 
 function zuLokalemIsoString(datum) {
@@ -42,10 +43,30 @@ function istInFerien(bundesland, datum) {
     });
 }
 
+function istNachbarlandInFerien(landName, datum) {
+    if (!NACHBARLAND_FERIEN[landName]) return false;
+    let d = new Date(datum.getFullYear(), datum.getMonth(), datum.getDate()).getTime();
+    return NACHBARLAND_FERIEN[landName].some(zeitraum => {
+        let s = new Date(zeitraum.start.getFullYear(), zeitraum.start.getMonth(), zeitraum.start.getDate()).getTime();
+        let e = new Date(zeitraum.ende).setHours(23,59,59,999);
+        return d >= s && d <= e;
+    });
+}
+
 function holeAktuellenFerienZeitraum(bundesland, datum) {
     if (!FERIEN_DATEN[bundesland]) return null;
     let d = new Date(datum.getFullYear(), datum.getMonth(), datum.getDate()).getTime();
     return FERIEN_DATEN[bundesland].find(zeitraum => {
+        let s = new Date(zeitraum.start.getFullYear(), zeitraum.start.getMonth(), zeitraum.start.getDate()).getTime();
+        let e = new Date(zeitraum.ende).setHours(23,59,59,999);
+        return d >= s && d <= e;
+    }) || null;
+}
+
+function holeEuroFerienZeitraum(landName, datum) {
+    if (!NACHBARLAND_FERIEN[landName]) return null;
+    let d = new Date(datum.getFullYear(), datum.getMonth(), datum.getDate()).getTime();
+    return NACHBARLAND_FERIEN[landName].find(zeitraum => {
         let s = new Date(zeitraum.start.getFullYear(), zeitraum.start.getMonth(), zeitraum.start.getDate()).getTime();
         let e = new Date(zeitraum.ende).setHours(23,59,59,999);
         return d >= s && d <= e;
@@ -81,13 +102,13 @@ function berechneParkAuslastung(park, testTage) {
     const hatEigenFerien = testTage.some(tt => istInFerien(park.bundesland, tt));
     if (hatEigenFerien) return "voll"; 
 
-    const nachbarn = NACHBAR_MAP[park.bundesland] || [];
-    const hatNachbarFerien = nachbarn.some(nbl => testTage.some(tt => istInFerien(nbl, tt)));
+    const zugewieseneEuroNachbarn = EURO_NACHBAR_MAP[park.bundesland] || [];
+    const hatSkizzenNachbarFerien = zugewieseneEuroNachbarn.some(land => testTage.some(tt => istNachbarlandInFerien(land, tt)));
     const hatWochenende = testTage.some(tt => tt.getDay() === 0 || tt.getDay() === 6);
 
-    if (hatNachbarFerien && hatWochenende) {
+    if (hatSkizzenNachbarFerien && hatWochenende) {
         return "voll"; 
-    } else if (hatNachbarFerien || hatWochenende) {
+    } else if (hatSkizzenNachbarFerien || hatWochenende) {
         return "maessig"; 
     }
 
@@ -194,19 +215,7 @@ function initMapHover() {
             if (feiertagName) {
                 text = `${blName}: 🗓️ Feiertag (${feiertagName})`;
             } else if (zeitraum) {
-                let name = zeitraum.name;
-                if (!name) {
-                    const mStart = zeitraum.start.getMonth();
-                    if (mStart === 0 || mStart === 1) name = "Winterferien";
-                    else if (mStart === 2 || mStart === 3) name = "Osterferien";
-                    else if (mStart === 4 || mStart === 5) name = "Pfingstferien";
-                    else if (mStart === 6 || mStart === 7) name = "Sommerferien";
-                    else if (mStart === 9 || mStart === 10) name = "Herbstferien";
-                    else name = "Weihnachtsferien";
-                } else if (!name.toLowerCase().includes('ferien')) {
-                    name = name + "ferien";
-                }
-                
+                let name = zeitraum.name || "Schulferien";
                 const vonStr = formatiereDatumKurz(zeitraum.start);
                 const bisStr = formatiereDatumKurz(zeitraum.ende);
                 text = `${blName}: ☀️ ${name} (${vonStr} – ${bisStr})`;
@@ -224,6 +233,31 @@ function initMapHover() {
         });
         
         pin.addEventListener('mouseleave', () => {
+            tooltip.style.display = 'none';
+        });
+    });
+
+    document.querySelectorAll('.country-box').forEach(box => {
+        const landName = box.getAttribute('data-euro-land');
+        
+        box.addEventListener('mouseenter', () => {
+            const zeitraum = holeEuroFerienZeitraum(landName, aktuellesDatum);
+            if (zeitraum) {
+                const vonStr = formatiereDatumKurz(zeitraum.start);
+                const bisStr = formatiereDatumKurz(zeitraum.ende);
+                tooltip.textContent = `${landName}: ☀️ ${zeitraum.name} (${vonStr} – ${bisStr})`;
+            } else {
+                tooltip.textContent = `${landName}: Reguläre Schulzeit`;
+            }
+            tooltip.style.display = 'block';
+        });
+
+        box.addEventListener('mousemove', (e) => {
+            tooltip.style.top = (e.clientY + 15) + 'px';
+            tooltip.style.left = (e.clientX + 15) + 'px';
+        });
+        
+        box.addEventListener('mouseleave', () => {
             tooltip.style.display = 'none';
         });
     });
@@ -281,7 +315,6 @@ function pruefeInfoboxText() {
         return;
     }
 
-    // FIX: Das fehlerhafte Wort "blackout" wurde sauber entfernt
     if ((aktuellesDatum.getDay() === 0 || aktuellesDatum.getDay() === 6) && !ganzeWochePruefen) {
         document.getElementById('info-box').textContent = `Wochenende am ${formatiereDatumKurz(aktuellesDatum)} • Erhöhtes Basisaufkommen in allen Freizeitparks.`;
         return;
@@ -326,6 +359,62 @@ function updateDashboard() {
         if (holeFeiertagsNameFuerLand(d, ausgewaehltesBundesland) !== null) zelle.classList.add('feiertag-highlight');
     });
 
+    // FIX: Komplett überarbeitetes Kapsel-Styling, das Verzerrungen der Punkte unmöglich macht
+    document.querySelectorAll('.country-box').forEach(box => {
+        box.classList.remove('aktiviert');
+        box.style.display = 'block';
+        box.style.position = 'absolute';
+
+        const istGedreht = box.classList.contains('cbox-west-1') || box.classList.contains('cbox-west-2') || 
+                           box.classList.contains('cbox-west-3') || box.classList.contains('cbox-west-4') ||
+                           box.classList.contains('cbox-east-1') || box.classList.contains('cbox-east-2');
+
+        if (istGedreht) {
+            box.style.padding = '22px 5px 8px 5px'; // Schafft oben Platz für den absoluten Punkt
+        } else {
+            box.style.padding = '5px 8px 5px 20px'; // Schafft links Platz für den flachen Punkt
+        }
+
+        const dot = box.querySelector('.indicator-dot');
+        if (dot) {
+            dot.style.display = 'block';
+            dot.style.position = 'absolute';
+            dot.style.width = '7px';
+            dot.style.height = '7px';
+            dot.style.borderRadius = '50%';
+            dot.style.backgroundColor = '#34c759'; 
+            dot.style.boxShadow = '0 1px 4px rgba(52, 199, 89, 0.3)';
+            
+            // Unzerstörbare absolute Positionierung der Punkte innerhalb der Kapseln
+            if (istGedreht) {
+                dot.style.top = '7px';
+                dot.style.left = '50%';
+                dot.style.transform = 'translateX(-50%)';
+                dot.style.marginLeft = '0px';
+                dot.style.marginTop = '0px';
+            } else {
+                dot.style.top = '50%';
+                dot.style.left = '7px';
+                dot.style.transform = 'translateY(-50%)';
+                dot.style.marginLeft = '0px';
+                dot.style.marginTop = '0px';
+            }
+        }
+    });
+
+    Object.keys(NACHBARLAND_FERIEN).forEach(land => {
+        const hatFerien = testTage.some(tt => istNachbarlandInFerien(land, tt));
+        const boxElement = document.getElementById(`cbox-${land}`);
+        if (hatFerien && boxElement) {
+            boxElement.classList.add('aktiviert');
+            const dot = boxElement.querySelector('.indicator-dot');
+            if (dot) {
+                dot.style.backgroundColor = '#ff3b30'; 
+                dot.style.boxShadow = '0 1px 4px rgba(255, 59, 48, 0.3)';
+            }
+        }
+    });
+
     const laenderListe = document.getElementById('laender-liste');
     laenderListe.innerHTML = '';
 
@@ -338,17 +427,7 @@ function updateDashboard() {
         let ferienNameZusatz = "";
 
         if (zeitraum) {
-            let name = zeitraum.name;
-            if (!name) {
-                const mStart = zeitraum.start.getMonth();
-                if (mStart === 0 || mStart === 1) name = "Winter";
-                else if (mStart === 2 || mStart === 3) name = "Ostern";
-                else if (mStart === 4 || mStart === 5) name = "Pfingsten";
-                else if (mStart === 6 || mStart === 7) name = "Sommer";
-                else if (mStart === 9 || mStart === 10) name = "Herbst";
-                else name = "Weihnachten";
-            }
-            
+            let name = zeitraum.name || "Ferien";
             datumsText = `<span class="park-ort" style="display:block; margin-top:2px;">${formatiereSpanne(zeitraum.start)} – ${formatiereSpanne(zeitraum.ende)}</span>`;
             ferienNameZusatz = ` (${name})`;
         }
@@ -372,6 +451,33 @@ function updateDashboard() {
             }
         });
     });
+
+    const euroLaenderListe = document.getElementById('euro-laender-liste');
+    if (euroLaenderListe) {
+        euroLaenderListe.innerHTML = '';
+        Object.keys(NACHBARLAND_FERIEN).sort().forEach(land => {
+            const hatFerienInSpanne = testTage.some(tt => istNachbarlandInFerien(land, tt));
+            const zeitraum = holeEuroFerienZeitraum(land, aktuellesDatum);
+            let datumsText = "";
+            let ferienNameZusatz = "";
+
+            if (zeitraum) {
+                datumsText = `<span class="park-ort" style="display:block; margin-top:2px;">${formatiereSpanne(zeitraum.start)} – ${formatiereSpanne(zeitraum.ende)}</span>`;
+                ferienNameZusatz = ` (${zeitraum.name})`;
+            }
+
+            const item = document.createElement('div');
+            item.className = `land-item ${hatFerienInSpanne ? 'ferien' : ''}`;
+            item.innerHTML = `
+                <div class="park-info">
+                    <span class="park-name">${land}${ferienNameZusatz}</span>
+                    ${datumsText}
+                </div>
+                <span class="status-badge">${hatFerienInSpanne ? 'Ferien' : 'Schule'}</span>
+            `;
+            euroLaenderListe.appendChild(item);
+        });
+    }
 
     pruefeInfoboxText();
 

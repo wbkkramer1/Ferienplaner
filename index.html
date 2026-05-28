@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ferien-Finder Deutschland 2026</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=21">
 </head>
 <body>
 
@@ -38,6 +38,13 @@
         <div class="map-area apple-card">
             <div id="info-box">Lade Ferien-Finder...</div>
             
+            <div id="cbox-Dänemark" class="country-box cbox-north" data-euro-land="Dänemark">Dänemark <span class="indicator-dot"></span></div>
+            
+            <div id="cbox-Niederlande" class="country-box cbox-west-1" data-euro-land="Niederlande">Niederlande <span class="indicator-dot"></span></div>
+            <div id="cbox-Belgien" class="country-box cbox-west-2" data-euro-land="Belgien">Belgien <span class="indicator-dot"></span></div>
+            <div id="cbox-Luxemburg" class="country-box cbox-west-3" data-euro-land="Luxemburg">Luxemburg <span class="indicator-dot"></span></div>
+            <div id="cbox-Frankreich" class="country-box cbox-west-4" data-euro-land="Frankreich">Frankreich <span class="indicator-dot"></span></div>
+
             <div class="maps-horizontal-container">
                 <div class="map-wrapper-outer">
                     <div class="map-container">
@@ -87,7 +94,6 @@
                             <div id="parkpin-Taunus" class="park-pin" style="top: 57%; left: 27%;" data-park="Taunus Wunderland"></div>
                             <div id="parkpin-Geiselwind" class="park-pin" style="top: 61%; left: 49%;" data-park="Freizeit-Land Geiselwind"></div>
                             <div id="parkpin-Potts-Park" class="park-pin" style="top: 36%; left: 29%;" data-park="Potts Park"></div>
-                            
                             <div id="parkpin-Ravensburger-Spieleland" class="park-pin" style="top: 86%; left: 34%;" data-park="Ravensburger Spieleland"></div>
                             <div id="parkpin-Lochmuehle" class="park-pin" style="top: 55%; left: 31%;" data-park="Freizeitpark Lochmühle"></div>
                             <div id="parkpin-Jaderpark" class="park-pin" style="top: 18%; left: 29%;" data-park="Jaderpark"></div>
@@ -100,6 +106,11 @@
                     </div>
                 </div>
             </div>
+
+            <div id="cbox-Polen" class="country-box cbox-east-1" data-euro-land="Polen">Polen <span class="indicator-dot"></span></div>
+            <div id="cbox-Tschechien" class="country-box cbox-east-2" data-euro-land="Tschechien">Tschechien <span class="indicator-dot"></span></div>
+            <div id="cbox-Schweiz" class="country-box cbox-south-1" data-euro-land="Schweiz">Schweiz <span class="indicator-dot"></span></div>
+            <div id="cbox-Österreich" class="country-box cbox-south-2" data-euro-land="Österreich">Österreich <span class="indicator-dot"></span></div>
         </div>
 
         <div class="sidebar-right">
@@ -108,9 +119,15 @@
                     <h2>Top Freizeitparks</h2>
                     <div id="parks-liste"></div>
                 </div>
-                <div class="grid-column">
-                    <h2>Status nach Bundesland</h2>
-                    <div id="laender-liste"></div>
+                <div class="grid-column combined-column">
+                    <div class="sub-section-states">
+                        <h2>Status nach Bundesland</h2>
+                        <div id="laender-liste"></div>
+                    </div>
+                    <div class="sub-section-euro">
+                        <h2>Status EU-Nachbarländer</h2>
+                        <div id="euro-laender-liste"></div>
+                    </div>
                 </div>
             </div>
         </div>
