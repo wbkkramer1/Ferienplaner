@@ -23,7 +23,8 @@ Das Tool hilft Familien, Freizeitpark-Enthusiasten und Reiseplanern dabei, besuc
 
 Die Auslastung eines Freizeitparks für ein gewähltes Datum (oder eine Woche) wird in drei Stufen (`leer`, `maessig`, `voll`) unterteilt:
 
-1. **🔴 VOLL (Rot):** - Es ist ein gesetzlicher Feiertag im Bundesland des Parks.
+1. **🔴 VOLL (Rot):**
+   - Es ist ein gesetzlicher Feiertag im Bundesland des Parks.
    - ODER: Das Bundesland des Parks hat aktuell Schulferien.
    - ODER: Mindestens ein direktes **Nachbarland** hat Ferien *und gleichzeitig* fällt der Tag auf ein Wochenende (Samstag/Sonntag).
 2. **🟡 MÄSSIG (Gelb):**
