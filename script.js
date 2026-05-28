@@ -271,9 +271,9 @@ function initMapHover() {
                 const status = berechneParkAuslastung(parkGefunden, [aktuellesDatum]);
                 let statusText = "";
                 
-                if (status === "voll") statusText = `🔴 Voll`;
-                if (status === "maessig") statusText = `🟡 Mäßig`;
-                if (status === "leer") statusText = `🟢 Leer`;
+                if (status === "voll") statusText = `🔴 Trubel`;
+                if (status === "maessig") statusText = `🟡 Belebt`;
+                if (status === "leer") statusText = `🟢 Ruhig`;
                 
                 tooltip.textContent = `${parkGefunden.name}: ${statusText}`;
                 tooltip.style.display = 'block';
@@ -359,7 +359,6 @@ function updateDashboard() {
         if (holeFeiertagsNameFuerLand(d, ausgewaehltesBundesland) !== null) zelle.classList.add('feiertag-highlight');
     });
 
-    // FIX: Komplett überarbeitetes Kapsel-Styling, das Verzerrungen der Punkte unmöglich macht
     document.querySelectorAll('.country-box').forEach(box => {
         box.classList.remove('aktiviert');
         box.style.display = 'block';
@@ -370,9 +369,9 @@ function updateDashboard() {
                            box.classList.contains('cbox-east-1') || box.classList.contains('cbox-east-2');
 
         if (istGedreht) {
-            box.style.padding = '22px 5px 8px 5px'; // Schafft oben Platz für den absoluten Punkt
+            box.style.padding = '22px 5px 8px 5px'; 
         } else {
-            box.style.padding = '5px 8px 5px 20px'; // Schafft links Platz für den flachen Punkt
+            box.style.padding = '5px 8px 5px 20px'; 
         }
 
         const dot = box.querySelector('.indicator-dot');
@@ -385,7 +384,6 @@ function updateDashboard() {
             dot.style.backgroundColor = '#34c759'; 
             dot.style.boxShadow = '0 1px 4px rgba(52, 199, 89, 0.3)';
             
-            // Unzerstörbare absolute Positionierung der Punkte innerhalb der Kapseln
             if (istGedreht) {
                 dot.style.top = '7px';
                 dot.style.left = '50%';
@@ -420,34 +418,44 @@ function updateDashboard() {
 
     Object.keys(FERIEN_DATEN).sort().forEach(bl => {
         const hatFerienInSpanne = testTage.some(tt => istInFerien(bl, tt));
-        const hatFeiertagHeute = testTage.some(tt => holeFeiertagsNameFuerLand(tt, bl) !== null);
+        
+        let gefundenerFeiertagsName = null;
+        for (let tt of testTage) {
+            const name = holeFeiertagsNameFuerLand(tt, bl);
+            if (name) {
+                gefundenerFeiertagsName = name;
+                break;
+            }
+        }
 
         const zeitraum = holeAktuellenFerienZeitraum(bl, aktuellesDatum);
         let datumsText = "";
-        let ferienNameZusatz = "";
+        let nameZusatz = "";
 
-        if (zeitraum) {
+        if (gefundenerFeiertagsName) {
+            nameZusatz = ` (${gefundenerFeiertagsName})`;
+        } else if (zeitraum) {
             let name = zeitraum.name || "Ferien";
             datumsText = `<span class="park-ort" style="display:block; margin-top:2px;">${formatiereSpanne(zeitraum.start)} – ${formatiereSpanne(zeitraum.ende)}</span>`;
-            ferienNameZusatz = ` (${name})`;
+            nameZusatz = ` (${name})`;
         }
 
         const item = document.createElement('div');
-        item.className = `land-item ${hatFerienInSpanne || hatFeiertagHeute ? 'ferien' : ''}`;
+        item.className = `land-item ${hatFerienInSpanne || gefundenerFeiertagsName !== null ? 'ferien' : ''}`;
 
         item.innerHTML = `
             <div class="park-info">
-                <span class="park-name">${bl}${ferienNameZusatz}</span>
+                <span class="park-name">${bl}${nameZusatz}</span>
                 ${datumsText}
             </div>
-            <span class="status-badge">${hatFeiertagHeute ? 'Feiertag' : (hatFerienInSpanne ? 'Ferien' : 'Schule')}</span>
+            <span class="status-badge">${gefundenerFeiertagsName !== null ? 'Feiertag' : (hatFerienInSpanne ? 'Ferien' : 'Schule')}</span>
         `;
         laenderListe.appendChild(item);
 
         document.querySelectorAll('.ferien-pin').forEach(pin => {
             if (pin.getAttribute('data-land') === bl) {
                 pin.className = "ferien-pin";
-                if (!hatFerienInSpanne && !hatFeiertagHeute) pin.classList.add('leuchtet-gruen');    
+                if (!hatFerienInSpanne && gefundenerFeiertagsName === null) pin.classList.add('leuchtet-gruen');    
             }
         });
     });
@@ -490,9 +498,10 @@ function updateDashboard() {
         const parkItem = document.createElement('div');
         parkItem.className = `park-item ${auslastung === 'voll' ? 'ferien' : (auslastung === 'maessig' ? 'maessig' : '')}`;
         
-        let badgeText = "Leer";
-        if (auslastung === "voll") badgeText = "Voll";
-        if (auslastung === "maessig") badgeText = "Mäßig";
+        // NEU: Hier werden die Bezeichnungen für die Badges in der linken Liste ausgetauscht
+        let badgeText = "Ruhig";
+        if (auslastung === "voll") badgeText = "Trubel";
+        if (auslastung === "maessig") badgeText = "Belebt";
 
         parkItem.innerHTML = `
             <div class="park-info">
