@@ -1,200 +1,270 @@
 /* ==========================================================================
-   1. APPLE STYLE BASE (LIGHT MINIMALISM)
+   1. BASE STYLES & RESET (APPLE-MINIMALISM)
    ========================================================================== */
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    margin: 0; padding: 0;
-    background-color: #f5f5f7;
-    color: #1d1d1f;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    -webkit-font-smoothing: antialiased;
-}
-
-header {
-    background-color: rgba(255, 255, 255, 0.8);
-    backdrop-filter: saturate(180%) blur(20px);
-    width: 100%;
-    position: relative;
-    z-index: 1000;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.header-content {
-    max-width: 1600px;
-    margin: 0 auto;
-    padding: 12px 24px;
-}
-
-header h1 { 
-    margin: 0; 
-    font-size: 18px; 
-    font-weight: 600;
-    letter-spacing: -0.3px;
-    color: #1d1d1f;
-}
-header h1 span {
-    color: #86868b;
-    font-weight: 400;
-}
-
-.dashboard-wrapper {
-    display: flex; flex: 1; max-width: 100vw; box-sizing: border-box; padding: 15px; gap: 15px; align-items: stretch;
-    min-height: 0; 
-}
-
-/* ==========================================================================
-   2. THE APPLE CARD (WHITE ENCLOSURES)
-   ========================================================================== */
-.apple-card {
-    background-color: #ffffff;
-    border-radius: 16px;
-    border: 1px solid rgba(0, 0, 0, 0.04);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+* {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-.sidebar-left { flex: 0 0 340px; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
-.sidebar-right { flex: 0 0 660px; min-height: 0; }
-
-.controls-inner { padding: 15px; text-align: left; }
-#selected-date-display { margin: 0 0 10px 0; font-size: 20px; color: #1d1d1f; font-weight: 600; letter-spacing: -0.4px; }
-
-.state-dropdown {
-    width: 100%; padding: 8px 12px; margin-bottom: 12px; border-radius: 10px; 
-    border: 1px solid #d2d2d7; background-color: #ffffff; font-size: 14px; 
-    color: #1d1d1f; outline: none; cursor: pointer; font-weight: 500;
-    appearance: none;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='%2386868b' d='M0 0l5 5 5-5z'/></svg>");
-    background-repeat: no-repeat; background-position: right 14px center;
+body {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    padding: 20px;
+    min-height: 100vh;
 }
-.state-dropdown:hover { border-color: #86868b; background-color: #f5f5f7; }
 
-.week-toggle { display: inline-flex; align-items: center; gap: 12px; cursor: pointer; font-size: 14px; color: #1d1d1f; font-weight: 500; }
-.week-toggle input { display: none; }
-.custom-switch { width: 44px; height: 24px; background-color: #e5e5ea; border-radius: 12px; position: relative; transition: background-color 0.2s ease; }
-.custom-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background-color: #ffffff; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.08); transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-.week-toggle input:checked + .custom-switch { background-color: #34c759; }
-.week-toggle input:checked + .custom-switch::after { transform: translateX(20px); }
+/* HEADER */
+.main-header {
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.main-header h1 {
+    font-size: 2.2rem;
+    color: #ffffff;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
 
 /* ==========================================================================
-   3. APPLE SYSTEM CALENDAR (WITH DECENT WEEKEND MARKING)
+   2. DASHBOARD LAYOUT GRID (PC-ANSICHT)
    ========================================================================== */
-.yearly-calendar { 
-    flex: 1; 
-    display: grid; 
-    grid-template-columns: repeat(3, 1fr); 
-    gap: 8px; 
-    padding: 12px; 
-    overflow-y: hidden; 
-}
-.month-box { background: transparent; padding: 0; }
-.month-title { font-weight: 600; text-align: left; font-size: 9.5px; margin-bottom: 4px; color: #86868b; text-transform: uppercase; letter-spacing: 0.5px; }
-.days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; text-align: center; }
-
-/* Header-Kürzel: Sa und So dezent abdunkeln */
-.day-header { font-size: 8px; color: #1d1d1f; font-weight: 500; padding-bottom: 2px; }
-.day-header:nth-child(6), .day-header:nth-child(7) { color: #86868b; }
-
-.day-cell { font-size: 9.5px; padding: 3.5px 0; border-radius: 50%; cursor: pointer; color: #1d1d1f; font-weight: 500; transition: background 0.1s; border: 1px solid transparent; box-sizing: border-box; }
-.day-cell.empty { cursor: default; background: transparent; border: none; }
-.day-cell:not(.empty):hover { background-color: #f5f5f7; }
-
-/* FIX: Samstage und Sonntage im Monatsraster edel abdunkeln */
-.day-cell:nth-child(7n-1), .day-cell:nth-child(7n) { color: #86868b; }
-
-/* Highlights (Überschreiben die Wochenend-Farbe bei Relevanz) */
-.day-cell.ferien-highlight { background-color: rgba(52, 199, 89, 0.12) !important; color: #1a7031 !important; font-weight: 600; }
-.day-cell.feiertag-highlight { background-color: rgba(255, 59, 48, 0.08) !important; color: #ff3b30 !important; font-weight: 600; }
-.day-cell.today-highlight { border: 1px solid #0071e3 !important; color: #0071e3 !important; }
-.day-cell.active { background: #0071e3 !important; color: #ffffff !important; font-weight: 600; border-color: #0071e3 !important; }
-
-/* ==========================================================================
-   4. MITTLERE SPALTE: APPLE KARTEN
-   ========================================================================== */
-.map-area { flex: 1; display: flex; flex-direction: column; padding: 20px; min-height: 0; }
-
-#info-box {
-    padding: 10px 15px; background: #f5f5f7; border-radius: 10px;
-    text-align: center; font-weight: 500; margin-bottom: 16px; font-size: 13px; flex-shrink: 0;
-    color: #1d1d1f; border: 1px solid rgba(0,0,0,0.02);
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 360px 1fr 340px;
+    gap: 20px;
+    align-items: start;
+    max-width: 1800px;
+    margin: 0 auto;
 }
 
-.maps-horizontal-container { display: flex; flex: 1; width: 100%; gap: 20px; min-height: 0; }
-.map-wrapper-outer { flex: 1; display: flex; justify-content: center; align-items: center; min-height: 0; }
-.map-wrapper-outer.parks-map { border-left: 1px solid #e8e8ed; padding-left: 20px; }
-
-.map-container { height: 100%; max-height: 540px; aspect-ratio: 400 / 580; position: relative; }
-.map-container img { 
-    width: 100%; height: 100%; object-fit: contain; 
-    filter: brightness(1.02) contrast(0.85) saturate(0.1) opacity(0.5); 
+.sidebar-panel, .map-panel, .lists-panel {
+    background-color: #242424;
+    border-radius: 12px;
+    border: 1px solid #333333;
+    padding: 20px;
 }
 
-.pin-overlay { position: absolute; top: 2.6%; bottom: 2.6%; left: 3.75%; right: 3.75%; pointer-events: none; }
+/* STEUERUNG (Sidebar) */
+.control-box {
+    background-color: #2d2d2d;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #3d3d3d;
+    margin-bottom: 20px;
+}
 
+.control-box h2 {
+    font-size: 1.4rem;
+    color: #ffffff;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 12px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.85rem;
+    color: #aaa;
+    margin-bottom: 5px;
+}
+
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    background-color: #1a1a1a;
+    border: 1px solid #444;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+/* SWITCH TOGGLE */
+.toggle-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+    position: absolute; cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #444; transition: .3s;
+}
+.slider:before {
+    position: absolute; content: "";
+    height: 16px; width: 16px; left: 4px; bottom: 4px;
+    background-color: white; transition: .3s;
+}
+input:checked + .slider { background-color: #3b82f6; }
+input:checked + .slider:before { transform: translateX(20px); }
+.slider.round { border-radius: 24px; }
+.slider.round:before { border-radius: 50%; }
+.toggle-label { font-size: 0.9rem; color: #ddd; }
+
+/* KALENDER-SCROLLBOX (PC) */
+.calendar-wrapper {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.month-box {
+    background-color: #2d2d2d;
+    border: 1px solid #3d3d3d;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 15px;
+}
+
+.month-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.days-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    text-align: center;
+}
+
+.day-header { font-size: 0.75rem; color: #777; font-weight: 600; padding-bottom: 4px; }
+.day-cell {
+    font-size: 0.85rem; padding: 6px 0; color: #ccc;
+    cursor: pointer; border-radius: 4px; transition: background 0.2s;
+}
+.day-cell:hover:not(.empty) { background-color: #444; color: #fff; }
+.day-cell.empty { cursor: default; }
+
+/* HIGHLIGHTS */
+.day-cell.active { background-color: #3b82f6 !important; color: #ffffff !important; font-weight: bold; }
+.day-cell.ferien-highlight { background-color: rgba(239, 68, 68, 0.25); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+.day-cell.feiertag-highlight { background-color: rgba(168, 85, 247, 0.25); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); }
+.day-cell.today-highlight { border: 2px solid #eab308; }
+
+/* INFO-BANNER & MAPS */
+.info-banner {
+    background-color: #2d2d2d;
+    border-left: 4px solid #3b82f6;
+    padding: 15px; border-radius: 6px; margin-bottom: 20px; min-height: 54px;
+}
+
+#info-box { font-size: 0.95rem; color: #e0e0e0; line-height: 1.4; }
+.split-maps-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+.map-box { background-color: #2d2d2d; border: 1px solid #3d3d3d; border-radius: 10px; padding: 15px; text-align: center; }
+.map-box h3 { font-size: 1.1rem; color: #fff; margin-bottom: 15px; font-weight: 500; }
+
+.map-graphic-wrapper { position: relative; display: inline-block; width: 100%; max-width: 420px; margin: 0 auto; }
+.germany-svg { width: 100%; height: auto; display: block; filter: invert(0.9) brightness(0.6) sepia(0.1); opacity: 0.85; }
+
+/* PINS */
 .ferien-pin, .park-pin {
-    position: absolute; width: 12px; height: 12px; 
-    border: 2px solid #ffffff; border-radius: 50%; 
-    cursor: pointer; pointer-events: auto; transition: all 0.15s ease;
+    position: absolute; width: 12px; height: 12px; border-radius: 50%;
+    transform: translate(-50%, -50%); cursor: pointer; box-shadow: 0 0 8px rgba(0,0,0,0.8);
+    transition: transform 0.2s; z-index: 10;
 }
-.ferien-pin:hover, .park-pin:hover { transform: scale(1.3); z-index: 100; box-shadow: 0 3px 10px rgba(0,0,0,0.15); }
+.ferien-pin:hover, .park-pin:hover { transform: translate(-50%, -50%) scale(1.5); z-index: 99; }
+.ferien-pin { background-color: #ef4444; border: 2px solid #ffffff; }
+.ferien-pin.leuchtet-gruen { background-color: #22c55e; }
+.park-pin { border: 1.5px solid #ffffff; border-radius: 3px; }
+.park-pin.leuchtet-gruen { background-color: #22c55e; }
+.park-pin.leuchtet-gelb { background-color: #eab308; }
+.park-pin.leuchtet-rot { background-color: #ef4444; }
 
-.ferien-pin.leuchtet-gruen, .park-pin.leuchtet-gruen { 
-    background-color: #34c759; 
-    box-shadow: 0 2px 8px rgba(52, 199, 89, 0.4); 
-}
-.park-pin.leuchtet-gelb {
-    background-color: #ff9500 !important; 
-    box-shadow: 0 2px 8px rgba(255, 149, 0, 0.4) !important;
-}
-.ferien-pin, .park-pin.leuchtet-rot {
-    background-color: #ff3b30;
-    box-shadow: 0 2px 8px rgba(255, 59, 48, 0.4);
-}
+/* LISTEN RECHTS */
+.panel-box { background-color: #2d2d2d; border: 1px solid #3d3d3d; border-radius: 10px; padding: 15px; }
+.panel-box h3 { font-size: 1.1rem; color: #fff; margin-bottom: 12px; font-weight: 500; }
+.scroll-container { max-height: 38vh; overflow-y: auto; padding-right: 5px; }
 
-.park-pin { border-radius: 3px; transform: rotate(45deg); }
-.park-pin:hover { transform: scale(1.3) rotate(45deg); }
+.park-item, .land-item {
+    display: flex; justify-content: space-between; align-items: center; padding: 10px;
+    background-color: #22c55e; color: #ffffff; border-radius: 6px; margin-bottom: 8px;
+    font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: transform 0.15s;
+}
+.park-item:hover, .land-item:hover { transform: translateX(3px); }
+.park-item.maessig { background-color: #eab308; color: #1a1a1a; }
+.park-item.ferien, .land-item.ferien { background-color: #ef4444; color: #ffffff; }
+
+.park-info { display: flex; flex-direction: column; }
+.park-name { font-weight: 600; }
+.park-ort { font-size: 0.75rem; opacity: 0.9; }
+.park-status-badge, .status-badge { font-size: 0.75rem; padding: 4px 8px; background-color: rgba(0, 0, 0, 0.25); border-radius: 4px; font-weight: 600; text-transform: uppercase; }
+
+/* SCROLLBARS */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background-color: #444; border-radius: 4px; }
+
 
 /* ==========================================================================
-   5. RECHTE SPALTE: GRID SEKTION
+   3. INJEKTION: DIE MOBIL-REVOLUTION (MEDIA QUERIES)
    ========================================================================== */
-.list-container { padding: 20px; height: 100%; box-sizing: border-box; min-height: 0; }
-.split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-.grid-column { display: flex; flex-direction: column; min-height: 0; }
+@media (max-width: 1200px) {
+    /* 3 Spalten kollabieren untereinander */
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 0;
+    }
 
-.list-container h2 { 
-    margin: 0; font-size: 14px; color: #1d1d1f; text-align: left; 
-    border-bottom: 1px solid #e8e8ed; padding-bottom: 10px; font-weight: 600;
-    letter-spacing: -0.2px; margin-bottom: 12px;
+    body {
+        padding: 10px;
+    }
+
+    /* Kalender wird mobil zu einer horizontalen Swipe-Box! */
+    .calendar-wrapper {
+        display: flex;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        gap: 12px;
+        max-height: none;
+        padding-bottom: 10px;
+    }
+
+    .month-box {
+        flex: 0 0 290px; /* Jedes Monat bekommt eine feste Breite im Swipe-Menü */
+        scroll-snap-align: start;
+        margin-bottom: 0;
+    }
+
+    /* Die beiden Deutschlandkarten brechen sauber untereinander */
+    .split-maps-container {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    /* Listen-Container dürfen auf Handys dynamisch mitwachsen */
+    .scroll-container {
+        max-height: 400px;
+    }
 }
 
-#parks-liste { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; flex: 1; overflow-y: auto; padding-right: 4px; align-content: start; }
-.park-item, .land-item {
-    display: flex; justify-content: space-between; align-items: center; padding: 0 12px;
-    background: #ffffff; border: 1px solid #e8e8ed; border-radius: 10px;
-    cursor: pointer; transition: all 0.1s; height: 38px; box-sizing: border-box;
+@media (max-width: 480px) {
+    .main-header h1 {
+        font-size: 1.6rem;
+    }
+    
+    .sidebar-panel, .map-panel, .lists-panel {
+        padding: 12px;
+    }
 }
-.park-item:hover, .land-item:hover { background-color: #f5f5f7; }
-
-.park-info { display: flex; flex-direction: column; text-align: left; overflow: hidden; padding-right: 4px; }
-.park-name { font-size: 11px; font-weight: 600; color: #1d1d1f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.park-ort { font-size: 8.5px; color: #86868b; margin-top: 1px; }
-
-.park-status-badge { padding: 3px 8px; border-radius: 12px; font-size: 9px; font-weight: 600; flex-shrink: 0; text-align: center; width: 44px; box-sizing: border-box; }
-.status-badge { padding: 3px 8px; border-radius: 12px; font-size: 9px; font-weight: 600; flex-shrink: 0; text-align: center; width: 52px; box-sizing: border-box; }
-
-.park-status-badge.state-leer, .status-badge { background-color: #eaf7ec; color: #1a7031; }
-.park-item.maessig { border-color: rgba(255, 149, 0, 0.15); }
-.park-status-badge.state-maessig { background-color: #fff4e6; color: #b36b00; }
-.park-item.ferien { background-color: #fdf2f2; border-color: rgba(255, 59, 48, 0.1); }
-.park-item.ferien .park-name { color: #ff3b30; }
-.park-status-badge.state-voll, .land-item.ferien .status-badge { background-color: #fde8e8; color: #cc2214; }
-
-#laender-liste { display: flex; flex-direction: column; gap: 5px; flex: 1; overflow-y: auto; padding-right: 4px; }
-.land-item { font-size: 11.5px; font-weight: 500; cursor: default; }
-
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #d2d2d7; border-radius: 4px; }
