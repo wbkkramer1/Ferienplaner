@@ -6,7 +6,7 @@ let ganzeWochePruefen = false;
 const MONATS_NAMEN = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 const WOCHEN_TAGE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
-// Deine exakte rote Linien-Zuordnung aus der Skizze
+// Zuordnung der ausländischen EU-Nachbarländer laut deiner Skizze
 const EURO_NACHBAR_MAP = {
     "Schleswig-Holstein": ["Dänemark"],
     "Hamburg": ["Dänemark"],
@@ -24,6 +24,26 @@ const EURO_NACHBAR_MAP = {
     "Berlin": [],
     "Brandenburg": ["Polen"],
     "Sachsen": ["Polen", "Tschechien"]
+};
+
+// Zuordnung der deutschen Nachbarbundesländer für den lückenlosen Inlands-Check
+const DE_NACHBAR_MAP = {
+    "Baden-Württemberg": ["Bayern", "Hessen", "Rheinland-Pfalz"],
+    "Bayern": ["Baden-Württemberg", "Hessen", "Thüringen", "Sachsen"],
+    "Berlin": ["Brandenburg"],
+    "Brandenburg": ["Berlin", "Mecklenburg-Vorpommern", "Sachsen", "Sachsen-Anhalt", "Niedersachsen"],
+    "Bremen": ["Niedersachsen"],
+    "Hamburg": ["Schleswig-Holstein", "Niedersachsen"],
+    "Hessen": ["Nordrhein-Westfalen", "Rheinland-Pfalz", "Baden-Württemberg", "Bayern", "Thüringen", "Niedersachsen"],
+    "Mecklenburg-Vorpommern": ["Schleswig-Holstein", "Niedersachsen", "Brandenburg"],
+    "Niedersachsen": ["Bremen", "Hamburg", "Schleswig-Holstein", "Mecklenburg-Vorpommern", "Brandenburg", "Sachsen-Anhalt", "Thüringen", "Hessen", "Nordrhein-Westfalen"],
+    "Nordrhein-Westfalen": ["Niedersachsen", "Hessen", "Rheinland-Pfalz"],
+    "Rheinland-Pfalz": ["Nordrhein-Westfalen", "Hessen", "Baden-Württemberg", "Saarland"],
+    "Saarland": ["Rheinland-Pfalz"],
+    "Sachsen": ["Brandenburg", "Sachsen-Anhalt", "Thüringen", "Bayern"],
+    "Sachsen-Anhalt": ["Niedersachsen", "Brandenburg", "Sachsen", "Thüringen"],
+    "Schleswig-Holstein": ["Hamburg", "Niedersachsen", "Mecklenburg-Vorpommern"],
+    "Thüringen": ["Hessen", "Bayern", "Sachsen", "Sachsen-Anhalt", "Niedersachsen"]
 };
 
 function zuLokalemIsoString(datum) {
@@ -104,11 +124,18 @@ function berechneParkAuslastung(park, testTage) {
 
     const zugewieseneEuroNachbarn = EURO_NACHBAR_MAP[park.bundesland] || [];
     const hatSkizzenNachbarFerien = zugewieseneEuroNachbarn.some(land => testTage.some(tt => istNachbarlandInFerien(land, tt)));
+    
+    const zugewieseneDeNachbarn = DE_NACHBAR_MAP[park.bundesland] || [];
+    const hatDeNachbarFerienOderFeiertag = zugewieseneDeNachbarn.some(bl => 
+        testTage.some(tt => istInFerien(bl, tt) || holeFeiertagsNameFuerLand(tt, bl) !== null)
+    );
+
     const hatWochenende = testTage.some(tt => tt.getDay() === 0 || tt.getDay() === 6);
 
-    if (hatSkizzenNachbarFerien && hatWochenende) {
+    if ((hatSkizzenNachbarFerien || hatDeNachbarFerienOderFeiertag) && hatWochenende) {
         return "voll"; 
-    } else if (hatSkizzenNachbarFerien || hatWochenende) {
+    } 
+    else if (hatSkizzenNachbarFerien || hatDeNachbarFerienOderFeiertag || hatWochenende) {
         return "maessig"; 
     }
 
@@ -327,7 +354,7 @@ function pruefeInfoboxText() {
 
     document.getElementById('info-box').textContent = ganzeWochePruefen 
         ? `In der Woche vom ${formatiereDatumKurz(aktuellesDatum)} bis ${formatiereDatumKurz(testTage[6])} haben ${ferienZaehler} von 16 Bundesländern Ferien.`
-        : `Am ${formatiereDatumKurz(aktuellesDatum)} haben ${ferienZaehler} von 16 Bundesländern Ferien.`;
+        : `Am ${formatiereDatumKurz(aktuellesDatum)} haben ${ferienZaehler} von 16 Bundesländern Ferien Regel.`;
 }
 
 function updateDashboard() {
@@ -355,8 +382,14 @@ function updateDashboard() {
 
         if (formatiereDatumKurz(d) === heuteStr) zelle.classList.add('today-highlight');
         if (zelleStr === aktStr) zelle.classList.add('active');
-        if (istInFerien(ausgewaehltesBundesland, d)) zelle.classList.add('ferien-highlight');
-        if (holeFeiertagsNameFuerLand(d, ausgewaehltesBundesland) !== null) zelle.classList.add('feiertag-highlight');
+        
+        // FIX: Parallele Prüfung erlaubt die gleichzeitige oder getrennte Vergabe ohne Blockade!
+        if (istInFerien(ausgewaehltesBundesland, d)) {
+            zelle.classList.add('ferien-highlight');
+        }
+        if (holeFeiertagsNameFuerLand(d, ausgewaehltesBundesland) !== null) {
+            zelle.classList.add('feiertag-highlight');
+        }
     });
 
     document.querySelectorAll('.country-box').forEach(box => {
@@ -498,7 +531,6 @@ function updateDashboard() {
         const parkItem = document.createElement('div');
         parkItem.className = `park-item ${auslastung === 'voll' ? 'ferien' : (auslastung === 'maessig' ? 'maessig' : '')}`;
         
-        // NEU: Hier werden die Bezeichnungen für die Badges in der linken Liste ausgetauscht
         let badgeText = "Ruhig";
         if (auslastung === "voll") badgeText = "Trubel";
         if (auslastung === "maessig") badgeText = "Belebt";

@@ -102,10 +102,10 @@ header h1 span {
 
 .day-cell:nth-child(7n-1), .day-cell:nth-child(7n) { color: #86868b; }
 
-.day-cell.today-highlight { border: 1px solid #0071e3 !important; color: #0071e3 !important; }
+.day-cell.today-highlight { border: 1px solid #1d1d1f !important; }
 .day-cell.active { background: #0071e3 !important; color: #ffffff !important; font-weight: 600; border-color: #0071e3 !important; }
-.day-cell.ferien-highlight { background-color: rgba(52, 199, 89, 0.12) !important; color: #ff3b30 !important; font-weight: 500; }
-.day-cell.feiertag-highlight { background-color: rgba(255, 59, 48, 0.08) !important; color: #ff3b30 !important; font-weight: 600; }
+.day-cell.ferien-highlight { background-color: rgba(255, 59, 48, 0.12) !important; color: #ff3b30 !important; font-weight: 500; }
+.day-cell.feiertag-highlight { background-color: rgba(175, 82, 222, 0.15) !important; color: #af52de !important; font-weight: 600; }
 
 /* ==========================================================================
    4. MITTLERE SPALTE: MAPS-AREAL
@@ -133,9 +133,9 @@ header h1 span {
     gap: 15px; 
     min-height: 0; 
     overflow: hidden;
-    padding: 10px 45px; 
+    padding: 5px 45px 10px 45px; 
     box-sizing: border-box;
-    align-items: center; 
+    align-items: stretch; 
     justify-content: center;
 }
 
@@ -161,7 +161,7 @@ header h1 span {
 
 .cbox-north { top: 58px; left: 50%; transform: translateX(-50%); padding: 4px 10px; }
 
-/* REPARIERTE UND MITTIG ZENTRIERTE POSITIONEN FÜR DIE SÜDLICHEN LÄNDER */
+/* SÜDLICHE LÄNDER EXAKT ZENTRIERT */
 .cbox-south-1 { 
     bottom: 20px; 
     left: 23%; 
@@ -191,8 +191,33 @@ header h1 span {
 .cbox-east-1 { right: 15px; top: 46%; }
 .cbox-east-2 { right: 15px; top: 57%; }
 
-.map-wrapper-outer { height: 100%; flex: 1; display: flex; justify-content: center; align-items: center; min-height: 0; overflow: hidden; }
+/* FIX: Richtet das Label und das SVG-Fenster senkrecht sauber aus */
+.map-wrapper-outer { 
+    height: 100%; 
+    flex: 1; 
+    display: flex; 
+    flex-direction: column;
+    align-items: center; 
+    justify-content: flex-start;
+    min-height: 0; 
+    overflow: hidden; 
+}
 .map-wrapper-outer.parks-map { border-left: 1px solid #e8e8ed; padding-left: 15px; }
+
+/* FIX: Design für die dezenten, minimalistischen Kartenüberschriften im Apple-Stil */
+.map-title-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #86868b;
+    margin-bottom: 8px;
+    text-align: center;
+    background-color: #f5f5f7;
+    padding: 2px 8px;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
 
 .map-container { 
     width: 100%; 
@@ -201,7 +226,6 @@ header h1 span {
     aspect-ratio: 400 / 580; 
     position: relative; 
     display: block;
-    margin-top: 15px; 
 }
 
 .map-container img { 
