@@ -354,7 +354,7 @@ function pruefeInfoboxText() {
 
     document.getElementById('info-box').textContent = ganzeWochePruefen 
         ? `In der Woche vom ${formatiereDatumKurz(aktuellesDatum)} bis ${formatiereDatumKurz(testTage[6])} haben ${ferienZaehler} von 16 Bundesländern Ferien.`
-        : `Am ${formatiereDatumKurz(aktuellesDatum)} haben ${ferienZaehler} von 16 Bundesländern Ferien Regel.`;
+        : `Am ${formatiereDatumKurz(aktuellesDatum)} haben ${ferienZaehler} von 16 Bundesländern Ferien.`;
 }
 
 function updateDashboard() {
@@ -383,7 +383,6 @@ function updateDashboard() {
         if (formatiereDatumKurz(d) === heuteStr) zelle.classList.add('today-highlight');
         if (zelleStr === aktStr) zelle.classList.add('active');
         
-        // FIX: Parallele Prüfung erlaubt die gleichzeitige oder getrennte Vergabe ohne Blockade!
         if (istInFerien(ausgewaehltesBundesland, d)) {
             zelle.classList.add('ferien-highlight');
         }

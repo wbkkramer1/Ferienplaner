@@ -40,88 +40,104 @@ const FERIEN_DATEN = {
         { name: "Osterferien", start: new Date(2026, 2, 30), ende: new Date(2026, 3, 11) },
         { name: "Pfingstferien", start: new Date(2026, 4, 26), ende: new Date(2026, 5, 5) },
         { name: "Sommerferien", start: new Date(2026, 6, 30), ende: new Date(2026, 8, 12) },
-        { name: "Herbstferien", start: new Date(2026, 10, 2), ende: new Date(2026, 10, 6) }
+        { name: "Herbstferien", start: new Date(2026, 10, 2), ende: new Date(2026, 10, 6) },
+        { name: "Weihnachtsferien", start: new Date(2026, 11, 23), ende: new Date(2027, 0, 9) }
     ],
     "Bayern": [
         { name: "Osterferien", start: new Date(2026, 2, 30), ende: new Date(2026, 3, 11) },
         { name: "Pfingstferien", start: new Date(2026, 4, 26), ende: new Date(2026, 5, 5) },
         { name: "Sommerferien", start: new Date(2026, 7, 3), ende: new Date(2026, 8, 14) },
-        { name: "Herbstferien", start: new Date(2026, 10, 2), ende: new Date(2026, 10, 6) }
+        { name: "Herbstferien", start: new Date(2026, 10, 2), ende: new Date(2026, 10, 6) },
+        { name: "Weihnachtsferien", start: new Date(2026, 11, 23), ende: new Date(2027, 0, 6) }
     ],
     "Berlin": [
         { name: "Osterferien", start: new Date(2026, 2, 30), ende: new Date(2026, 3, 11) },
-        { name: "Sommerferien", start: new Date(2026, 6, 9), ende: new Date(2026, 8, 22) },
-        { name: "Herbstferien", start: new Date(2026, 9, 19), ende: new Date(2026, 9, 30) }
+        { name: "Sommerferien", start: new Date(2026, 6, 9), ende: new Date(2026, 7, 22) },
+        { name: "Herbstferien", start: new Date(2026, 9, 19), ende: new Date(2026, 9, 30) },
+        { name: "Weihnachtsferien", start: new Date(2026, 11, 21), ende: new Date(2027, 0, 2) }
     ],
     "Brandenburg": [
         { name: "Osterferien", start: new Date(2026, 2, 30), ende: new Date(2026, 3, 11) },
-        { name: "Sommerferien", start: new Date(2026, 6, 9), ende: new Date(2026, 8, 22) },
-        { name: "Herbstferien", start: new Date(2026, 9, 19), ende: new Date(2026, 9, 30) }
+        { name: "Sommerferien", start: new Date(2026, 6, 9), ende: new Date(2026, 7, 22) },
+        { name: "Herbstferien", start: new Date(2026, 9, 19), ende: new Date(2026, 9, 30) },
+        { name: "Weihnachtsferien", start: new Date(2026, 11, 21), ende: new Date(2027, 0, 2) }
     ],
     "Bremen": [
         { name: "Osterferien", start: new Date(2026, 2, 23), ende: new Date(2026, 3, 7) },
         { name: "Pfingstferien", start: new Date(2026, 4, 12), ende: new Date(2026, 4, 22) },
         { name: "Sommerferien", start: new Date(2026, 6, 2), ende: new Date(2026, 7, 12) },
-        { name: "Herbstferien", start: new Date(2026, 9, 12), ende: new Date(2026, 9, 24) }
+        { name: "Herbstferien", start: new Date(2026, 9, 12), ende: new Date(2026, 9, 24) },
+        { name: "Weihnachtsferien", start: new Date(2026, 11, 23), ende: new Date(2027, 0, 8) }
     ],
     "Hamburg": [
         { name: "Frühjahrsferien", start: new Date(2026, 2, 2), ende: new Date(2026, 2, 13) },
         { name: "Osterferien", start: new Date(2026, 3, 30), ende: new Date(2026, 3, 30) },
         { name: "Sommerferien", start: new Date(2026, 6, 9), ende: new Date(2026, 7, 19) },
-        { name: "Herbstferien", start: new Date(2026, 9, 19), ende: new Date(2026, 9, 30) }
+        { name: "Herbstferien", start: new Date(2026, 9, 19), ende: new Date(2026, 9, 30) },
+        { name: "Weihnachtsferien", start: new Date(2026, 11, 21), ende: new Date(2027, 0, 2) }
     ],
     "Hessen": [
         { name: "Osterferien", start: new Date(2026, 2, 30), ende: new Date(2026, 3, 11) },
         { name: "Sommerferien", start: new Date(2026, 6, 29), ende: new Date(2026, 8, 4) },
-        { name: "Herbstferien", start: new Date(2026, 9, 5), ende: new Date(2026, 9, 17) }
+        { name: "Herbstferien", start: new Date(2026, 9, 5), ende: new Date(2026, 9, 17) },
+        { name: "Weihnachtsferien", start: new Date(2026, 11, 21), ende: new Date(2027, 0, 9) }
     ],
     "Mecklenburg-Vorpommern": [
         { name: "Osterferien", start: new Date(2026, 2, 30), ende: new Date(2026, 3, 8) },
         { name: "Pfingstferien", start: new Date(2026, 4, 22), ende: new Date(2026, 4, 26) },
         { name: "Sommerferien", start: new Date(2026, 6, 13), ende: new Date(2026, 7, 22) },
-        { name: "Herbstferien", start: new Date(2026, 9, 19), ende: new Date(2026, 9, 24) } // REPARIERT!
+        { name: "Herbstferien", start: new Date(2026, 9, 19), ende: new Date(2026, 9, 24) },
+        { name: "Weihnachtsferien", start: new Date(2026, 11, 23), ende: new Date(2027, 0, 6) }
     ],
     "Niedersachsen": [
         { name: "Osterferien", start: new Date(2026, 2, 23), ende: new Date(2026, 3, 7) },
         { name: "Pfingstferien", start: new Date(2026, 4, 14), ende: new Date(2026, 4, 14) },
         { name: "Sommerferien", start: new Date(2026, 6, 2), ende: new Date(2026, 7, 12) },
-        { name: "Herbstferien", start: new Date(2026, 9, 12), ende: new Date(2026, 9, 24) }
+        { name: "Herbstferien", start: new Date(2026, 9, 12), ende: new Date(2026, 9, 24) },
+        { name: "Weihnachtsferien", start: new Date(2026, 11, 23), ende: new Date(2027, 0, 8) }
     ],
     "Nordrhein-Westfalen": [
         { name: "Osterferien", start: new Date(2026, 2, 30), ende: new Date(2026, 3, 11) },
         { name: "Sommerferien", start: new Date(2026, 6, 20), ende: new Date(2026, 8, 1) },
-        { name: "Herbstferien", start: new Date(2026, 10, 12), ende: new Date(2026, 10, 24) }
+        { name: "Herbstferien", start: new Date(2026, 9, 12), ende: new Date(2026, 9, 24) },
+        { name: "Weihnachtsferien", start: new Date(2026, 11, 23), ende: new Date(2027, 0, 6) }
     ],
     "Rheinland-Pfalz": [
         { name: "Osterferien", start: new Date(2026, 2, 30), ende: new Date(2026, 3, 10) },
         { name: "Sommerferien", start: new Date(2026, 6, 29), ende: new Date(2026, 8, 4) },
-        { name: "Herbstferien", start: new Date(2026, 9, 5), ende: new Date(2026, 9, 16) }
+        { name: "Herbstferien", start: new Date(2026, 9, 5), ende: new Date(2026, 9, 16) },
+        { name: "Weihnachtsferien", start: new Date(2026, 11, 23), ende: new Date(2027, 0, 8) }
     ],
     "Saarland": [
         { name: "Osterferien", start: new Date(2026, 2, 30), ende: new Date(2026, 3, 10) },
         { name: "Sommerferien", start: new Date(2026, 6, 29), ende: new Date(2026, 8, 4) },
-        { name: "Herbstferien", start: new Date(2026, 9, 5), ende: new Date(2026, 9, 16) }
+        { name: "Herbstferien", start: new Date(2026, 9, 5), ende: new Date(2026, 9, 16) },
+        { name: "Weihnachtsferien", start: new Date(2026, 11, 23), ende: new Date(2027, 0, 8) }
     ],
     "Sachsen": [
         { name: "Osterferien", start: new Date(2026, 3, 2), ende: new Date(2026, 3, 11) },
         { name: "Sommerferien", start: new Date(2026, 6, 4), ende: new Date(2026, 7, 14) },
-        { name: "Herbstferien", start: new Date(2026, 9, 19), ende: new Date(2026, 9, 30) }
+        { name: "Herbstferien", start: new Date(2026, 9, 19), ende: new Date(2026, 9, 30) },
+        { name: "Weihnachtsferien", start: new Date(2026, 11, 23), ende: new Date(2027, 0, 2) }
     ],
     "Sachsen-Anhalt": [
         { name: "Osterferien", start: new Date(2026, 2, 23), ende: new Date(2026, 3, 3) },
         { name: "Pfingstferien", start: new Date(2026, 4, 26), ende: new Date(2026, 4, 29) },
         { name: "Sommerferien", start: new Date(2026, 6, 4), ende: new Date(2026, 7, 14) },
-        { name: "Herbstferien", start: new Date(2026, 9, 19), ende: new Date(2026, 9, 30) }
+        { name: "Herbstferien", start: new Date(2026, 9, 19), ende: new Date(2026, 9, 30) },
+        { name: "Weihnachtsferien", start: new Date(2026, 11, 21), ende: new Date(2027, 0, 2) }
     ],
     "Schleswig-Holstein": [
         { name: "Osterferien", start: new Date(2026, 2, 30), ende: new Date(2026, 3, 17) },
         { name: "Sommerferien", start: new Date(2026, 6, 20), ende: new Date(2026, 7, 29) },
-        { name: "Herbstferien", start: new Date(2026, 9, 12), ende: new Date(2026, 10, 24) }
+        { name: "Herbstferien", start: new Date(2026, 9, 12), ende: new Date(2026, 9, 24) },
+        { name: "Weihnachtsferien", start: new Date(2026, 11, 19), ende: new Date(2027, 0, 6) }
     ],
     "Thüringen": [
         { name: "Osterferien", start: new Date(2026, 2, 30), ende: new Date(2026, 3, 11) },
         { name: "Sommerferien", start: new Date(2026, 6, 4), ende: new Date(2026, 7, 14) },
-        { name: "Herbstferien", start: new Date(2026, 9, 12), ende: new Date(2026, 9, 24) }
+        { name: "Herbstferien", start: new Date(2026, 9, 12), ende: new Date(2026, 9, 24) },
+        { name: "Weihnachtsferien", start: new Date(2026, 11, 21), ende: new Date(2027, 0, 2) }
     ]
 };
 
@@ -132,7 +148,7 @@ const NACHBARLAND_FERIEN = {
     "Dänemark": [
         { name: "Winterferien", start: new Date(2026, 1, 7), ende: new Date(2026, 1, 15) },
         { name: "Osterferien", start: new Date(2026, 2, 28), ende: new Date(2026, 3, 6) },
-        { name: "Sommerferien", start: new Date(2026, 5, 5), ende: new Date(2026, 7, 9) }
+        { name: "Sommerferien", start: new Date(2026, 5, 27), ende: new Date(2026, 7, 9) } // REPARIERT! (27. Juni bis 9. August exakt eingestellt)
     ],
     "Polen": [
         { name: "Frühjahrsferien", start: new Date(2026, 3, 2), ende: new Date(2026, 3, 7) },
