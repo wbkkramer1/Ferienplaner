@@ -147,6 +147,7 @@ window.addEventListener('DOMContentLoaded', () => {
     baueKalender();
     initMapHover(); 
     updateDashboard();
+    initBesucherZaehler(); 
 
     document.getElementById('state-select').addEventListener('change', (e) => {
         ausgewaehltesBundesland = e.target.value;
@@ -158,6 +159,33 @@ window.addEventListener('DOMContentLoaded', () => {
         updateDashboard();
     });
 });
+
+// REPARIERTER BESUCHERZÄHLER (Nutzt jetzt die stabile Moe-Counter API)
+function initBesucherZaehler() {
+    const counterElement = document.getElementById('visitor-counter');
+    if (!counterElement) return;
+
+    // Nutzt einen stabilen Zählschlüssel basierend auf deinem Repository
+    fetch('https://count.getloli.com/get/@ferienfinder2026-wbkkramer')
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.count) {
+                counterElement.textContent = `Besuche: ${data.count}`;
+            } else {
+                counterElement.textContent = "Besuche: 1";
+            }
+        })
+        .catch(() => {
+            // Falls das Netzwerk blockiert, nutzen wir hier einen einfachen lokalen Session-Zähler
+            let lokaleBesuche = sessionStorage.getItem('lokale_besuche') || 1;
+            if (sessionStorage.getItem('besucht_jetzt') !== 'true') {
+                lokaleBesuche = Number(lokaleBesuche) + 1;
+                sessionStorage.setItem('lokale_besuche', lokaleBesuche);
+                sessionStorage.setItem('besucht_jetzt', 'true');
+            }
+            counterElement.textContent = `Besuche: ${lokaleBesuche}`;
+        });
+}
 
 function initDropdown() {
     const select = document.getElementById('state-select');
@@ -240,12 +268,12 @@ function initMapHover() {
             let text = "";
             
             if (feiertagName) {
-                text = `${blName}: 🗓️ Feiertag (${feiertagName})`;
+                text = `${blName}: Feiertag (${feiertagName})`;
             } else if (zeitraum) {
                 let name = zeitraum.name || "Schulferien";
                 const vonStr = formatiereDatumKurz(zeitraum.start);
                 const bisStr = formatiereDatumKurz(zeitraum.ende);
-                text = `${blName}: ☀️ ${name} (${vonStr} – ${bisStr})`;
+                text = `${blName}: ${name} (${vonStr} – ${bisStr})`;
             } else {
                 text = `${blName}: Reguläre Schulzeit`;
             }
@@ -272,7 +300,7 @@ function initMapHover() {
             if (zeitraum) {
                 const vonStr = formatiereDatumKurz(zeitraum.start);
                 const bisStr = formatiereDatumKurz(zeitraum.ende);
-                tooltip.textContent = `${landName}: ☀️ ${zeitraum.name} (${vonStr} – ${bisStr})`;
+                tooltip.textContent = `${landName}: ${zeitraum.name} (${vonStr} – ${bisStr})`;
             } else {
                 tooltip.textContent = `${landName}: Reguläre Schulzeit`;
             }
@@ -298,9 +326,9 @@ function initMapHover() {
                 const status = berechneParkAuslastung(parkGefunden, [aktuellesDatum]);
                 let statusText = "";
                 
-                if (status === "voll") statusText = `🔴 Trubel`;
-                if (status === "maessig") statusText = `🟡 Belebt`;
-                if (status === "leer") statusText = `🟢 Ruhig`;
+                if (status === "voll") statusText = `Trubel`;
+                if (status === "maessig") statusText = `Belebt`;
+                if (status === "leer") statusText = `Ruhig`;
                 
                 tooltip.textContent = `${parkGefunden.name}: ${statusText}`;
                 tooltip.style.display = 'block';
@@ -338,7 +366,7 @@ function pruefeInfoboxText() {
 
     const feiertagName = holeFeiertagsNameFuerLand(aktuellesDatum, ausgewaehltesBundesland);
     if (feiertagName && !ganzeWochePruefen) {
-        document.getElementById('info-box').textContent = `🗓️ Gesetzlicher Feiertag in ${ausgewaehltesBundesland}: ${feiertagName}`;
+        document.getElementById('info-box').textContent = `Gesetzlicher Feiertag in ${ausgewaehltesBundesland}: ${feiertagName}`;
         return;
     }
 
